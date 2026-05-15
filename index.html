@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfWise | AI-Based Retail ERP</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="erp-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <h2>ShelfWise AI</h2>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li class="active"><i class="fa-solid fa-microchip"></i> AI Engine Dashboard</li>
+                    <li><i class="fa-solid fa-warehouse"></i> Batch Inventory</li>
+                    <li><i class="fa-solid fa-route"></i> Workflow Routing</li>
+                    <li><i class="fa-solid fa-chart-simple"></i> Analytics</li>
+                </ul>
+            </nav>
+            <div class="system-status">
+                <p>System Status: <span class="status-indicator online"></span> Online</p>
+                <p>DQN Agent: <span class="text-success">Active</span></p>
+                <p>XGBoost Model: <span class="text-success">V2.4 Running</span></p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1>Batch-Level Expiry & Risk Classification</h1>
+                <button class="btn btn-ai" onclick="runAIAnalysis()"><i class="fa-solid fa-rotate"></i> Run AI Analysis</button>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- KPI Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-header">High Risk Batches</div>
+                        <div class="kpi-value danger" id="kpi-high-risk">0</div>
+                        <div class="kpi-subtext">Requires immediate routing</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">AI Automated Routes</div>
+                        <div class="kpi-value primary" id="kpi-routed">0</div>
+                        <div class="kpi-subtext">Handled by DQN Agent</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">Total Active Batches</div>
+                        <div class="kpi-value" id="kpi-total">0</div>
+                        <div class="kpi-subtext">Monitored inventory</div>
+                    </div>
+                </div>
+
+                <!-- AI Data Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3><i class="fa-solid fa-table-list"></i> Real-Time Inventory Risk Analysis</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Batch ID</th>
+                                    <th>Product Category</th>
+                                    <th>Days to Expiry</th>
+                                    <th>XGBoost Risk Class</th>
+                                    <th>DQN Workflow Routing</th>
+                                    <th>Action Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
