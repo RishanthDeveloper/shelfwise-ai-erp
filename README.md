@@ -1,23 +1,27 @@
-# 🤖 ShelfWise: AI-Based Retail ERP
+# ShelfWise: AI-Based Retail ERP
 
-## Overview
-ShelfWise is an intelligent Retail Enterprise Resource Planning (ERP) dashboard prototype. This front-end interface visualizes the outputs of advanced Machine Learning models designed to automate batch-level inventory expiry management. 
+An intelligent retail Enterprise Resource Planning (ERP) system focused on AI-driven expiry management and inventory optimization for physical retailers.
 
-## Role
-**Front End Developer**
+## 📌 Overview
 
-## Tech Stack
-* **Frontend UI (This Repository):** HTML5, CSS3, Vanilla JavaScript
-* **Backend AI/ML Technologies (Simulated):** 
-  * **XGBoost Algorithm:** Used for Batch-Level Risk Classification.
-  * **Deep Q-Network (DQN):** Reinforcement learning algorithm used for dynamic workflow routing and automated discounting.
+ShelfWise leverages advanced machine learning algorithms to revolutionize how physical retail stores manage their on-shelf inventory. By accurately predicting product expiry risks and automating stock management decisions, the system minimizes waste, reduces financial losses, and maximizes operational efficiency.
 
-## Key Features
-* **AI Analysis Dashboard:** A dark-themed, enterprise-grade UI designed to display complex system metrics clearly.
-* **Risk Classification UI:** Visual representation of the XGBoost model outputs, instantly flagging high-risk inventory batches approaching expiry.
-* **Workflow Routing Simulation:** Demonstrates how DQN outputs are translated into actionable business logic (e.g., automatically applying a 40% discount to expiring perishables).
-* **Interactive Data Tables:** Real-time DOM manipulation to show state changes before and after the AI algorithms process the data.
+## 🧠 Core AI Architecture
 
-## How to View
-You can interact with the live front-end prototype here: 
-[Insert Your GitHub Pages Link Here]
+ShelfWise utilizes a dual-model artificial intelligence approach to handle inventory lifecycle management:
+
+* **Risk Classification (XGBoost):** Analyzes historical sales data, seasonal trends, and batch information to classify the expiration risk of current inventory items. 
+* **Dynamic Decision Making (Deep Q-Networks):** Implements a reinforcement learning environment (DQN) that continuously learns the optimal actions (e.g., dynamic discounting, automated restocking, or promotional bundling) to clear high-risk inventory before expiration.
+
+## 🚀 Features
+
+* **Real-Time Expiry Tracking:** Dashboard for monitoring the health and shelf-life of all active stock.
+* **Automated Markdown Strategies:** AI-suggested pricing adjustments based on real-time risk scores.
+* **ERP Integration:** Seamlessly connects with existing point-of-sale (POS) and supply chain databases.
+
+## 🛠️ Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/your-username/ShelfWise.git](https://github.com/your-username/ShelfWise.git)
+   cd ShelfWise
