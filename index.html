@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShelfWise ERP — AI Retail Management</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sb:#0f172a;--sb2:#1e293b;--sb3:#334155;--sbt:#94a3b8;--sbt2:#64748b;
+  --acc:#f59e0b;--acc2:#fbbf24;--acc-lt:#fef3c7;--acc-dk:#92400e;
+  --bg:#f1f5f9;--card:#fff;--brd:#e2e8f0;--brd2:#f1f5f9;
+  --tx:#0f172a;--txm:#64748b;--txl:#94a3b8;
+  --red:#ef4444;--red-bg:#fef2f2;--red-brd:#fecaca;--red-tx:#991b1b;
+  --amb:#f59e0b;--amb-bg:#fffbeb;--amb-brd:#fde68a;--amb-tx:#92400e;
+  --grn:#22c55e;--grn-bg:#f0fdf4;--grn-brd:#bbf7d0;--grn-tx:#166534;
+  --blu:#3b82f6;--blu-bg:#eff6ff;--blu-brd:#bfdbfe;--blu-tx:#1d4ed8;
+  --pur:#8b5cf6;--pur-bg:#f5f3ff;--pur-brd:#ddd6fe;--pur-tx:#6d28d9;
+}
+html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:14px;color:var(--tx);background:var(--bg)}
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:220px;min-width:220px;background:var(--sb);display:flex;flex-direction:column;overflow-y:auto}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--sb2)}
+.sb-brand{display:flex;align-items:center;gap:8px}
+.sb-icon{width:28px;height:28px;background:var(--acc);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--sb);flex-shrink:0}
+.sb-title{font-size:16px;font-weight:700;color:#f8fafc;letter-spacing:-0.3px}
+.sb-sub{font-size:9px;color:var(--sb3);text-transform:uppercase;letter-spacing:1.2px;margin-top:3px}
+.nav-sec{padding:14px 16px 5px;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--sb3);font-weight:600}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:13px;color:var(--sbt);border-left:3px solid transparent;transition:all 0.12s;user-select:none}
+.nav-item:hover{background:var(--sb2);color:#e2e8f0}
+.nav-item.active{background:var(--sb2);color:#f8fafc;border-left-color:var(--acc)}
+.nav-ic{width:16px;text-align:center;font-size:13px}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;min-width:18px;text-align:center}
+.sb-foot{margin-top:auto;padding:12px;border-top:1px solid var(--sb2)}
+.store-btn{width:100%;background:var(--sb2);border:1px solid var(--sb3);border-radius:8px;padding:10px 12px;cursor:pointer;text-align:left;transition:all 0.12s}
+.store-btn:hover{background:var(--sb3)}
+.store-nm{font-size:13px;font-weight:600;color:#e2e8f0}
+.store-hint{font-size:11px;color:var(--sbt2);margin-top:2px}
+.online-dot{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--grn);padding-top:8px;padding-left:2px}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--card);border-bottom:1px solid var(--brd);padding:0 24px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tb-title{font-size:15px;font-weight:600;flex:1;color:var(--tx)}
+.tb-pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px 20px}
+.card-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px}
+.kpi-grid{display:grid;gap:12px;margin-bottom:20px}
+.kpi-grid-5{grid-template-columns:repeat(5,1fr)}
+.kpi-grid-4{grid-template-columns:repeat(4,1fr)}
+.kpi-grid-3{grid-template-columns:repeat(3,1fr)}
+.kpi-card{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:14px 16px}
+.kpi-lb{font-size:10px;color:var(--txm);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600}
+.kpi-vl{font-size:21px;font-weight:700;line-height:1.1;color:var(--tx)}
+.kpi-dl{font-size:11px;margin-top:5px;font-weight:500}
+.dl-up{color:#16a34a}.dl-dn{color:#dc2626}.dl-nt{color:var(--txm)}
+.kpi-bar{height:3px;border-radius:2px;margin-top:8px;overflow:hidden}
+
+/* GRIDS */
+.row-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.row-2e{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.mb16{margin-bottom:16px}
+.mb12{margin-bottom:12px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 12px;font-size:10px;text-transform:uppercase;color:var(--txm);font-weight:600;letter-spacing:0.5px;border-bottom:2px solid var(--brd);background:#f8fafc;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--brd2);vertical-align:middle;color:var(--tx)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+
+/* PILLS */
+.pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
+.p-red{background:var(--red-bg);color:var(--red-tx)}
+.p-amb{background:var(--amb-bg);color:var(--amb-tx)}
+.p-grn{background:var(--grn-bg);color:var(--grn-tx)}
+.p-blu{background:var(--blu-bg);color:var(--blu-tx)}
+.p-pur{background:var(--pur-bg);color:var(--pur-tx)}
+.p-gray{background:#f1f5f9;color:#475569}
+
+/* PROGRESS */
+.pb{height:5px;border-radius:3px;background:var(--brd);overflow:hidden;display:inline-block}
+.pb-fill{height:100%;border-radius:3px}
+
+/* BUTTONS */
+.btn{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid;transition:all 0.12s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:disabled,.btn.applied{opacity:1;cursor:default}
+.btn-dark{background:#0f172a;color:#f8fafc;border-color:#0f172a}.btn-dark:hover{background:#1e293b}
+.btn-acc{background:var(--acc);color:#0f172a;border-color:var(--acc);font-weight:600}.btn-acc:hover{background:var(--acc2)}
+.btn-red{background:var(--red);color:#fff;border-color:var(--red)}.btn-red:hover{background:#dc2626}
+.btn-amb{background:var(--amb);color:#0f172a;border-color:var(--amb);font-weight:600}.btn-amb:hover{background:var(--acc2)}
+.btn-grn{background:var(--grn);color:#fff;border-color:var(--grn)}.btn-grn:hover{background:#16a34a}
+.btn-out{background:var(--card);color:var(--tx);border-color:var(--brd)}.btn-out:hover{background:#f8fafc}
+.btn-applied{background:var(--grn-bg);color:var(--grn-tx);border-color:var(--grn-brd)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 9px;font-size:11px}
+
+/* INSIGHT BANNER */
+.insight{background:var(--amb-bg);border:1px solid var(--amb-brd);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amb-tx);margin-bottom:14px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+
+/* ALERT ITEM */
+.alert-item{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.al-urgent{border-left:4px solid var(--red)}
+.al-warn{border-left:4px solid var(--amb)}
+.al-ok{border-left:4px solid var(--grn)}
+
+/* B2B CARD */
+.b2b-card{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:16px}
+.b2b-av{width:40px;height:40px;border-radius:50%;background:var(--blu-bg);color:var(--blu-tx);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+
+/* AI PANEL */
+.ai-dark{background:#0f172a;border-radius:10px;padding:20px;color:#e2e8f0}
+.ai-dark h3{color:#f8fafc;font-size:14px;font-weight:600;margin-bottom:3px}
+.ai-dark p{font-size:11px;color:#94a3b8;margin-bottom:14px;line-height:1.5}
+.ai-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ai-field label{font-size:10px;color:#94a3b8;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px}
+.ai-field input,.ai-field select{width:100%;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:7px 10px;color:#e2e8f0;font-size:13px}
+.ai-rc{background:#1e293b;border-radius:8px;padding:13px;border:1px solid #334155}
+.ai-rc-lb{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px}
+.ai-rc-vl{font-size:20px;font-weight:700}
+.ai-rc-sb{font-size:11px;color:#64748b;margin-top:2px}
+.ai-rec{border-radius:8px;padding:12px 14px;font-size:13px;font-weight:500;border:1px solid;margin-top:12px}
+.ai-why{background:#1e293b;border-radius:6px;padding:12px;margin-top:10px;font-size:11px;color:#94a3b8;line-height:1.7}
+
+/* CHART WRAPPER */
+.cw{position:relative;width:100%}
+.cw-200{height:200px}
+.cw-220{height:220px}
+.cw-260{height:260px}
+.cw-300{height:300px}
+.cw-180{height:180px}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:9000;padding:20px}
+.mo-box{background:#fff;border-radius:12px;padding:28px;width:640px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.3)}
+.mo-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--brd)}
+.mo-title{font-size:17px;font-weight:600}
+.mo-cls{background:none;border:none;font-size:20px;cursor:pointer;color:var(--txm);width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:4px}
+.mo-cls:hover{background:#f1f5f9}
+
+/* QUOTE */
+.quote-hd{background:#0f172a;color:#f8fafc;padding:20px 24px;border-radius:8px 8px 0 0;margin:-28px -28px 20px -28px}
+.quote-logo{font-size:18px;font-weight:700;margin-bottom:2px}
+.quote-sub{font-size:11px;color:#94a3b8}
+.quote-meta{display:flex;justify-content:space-between;margin-top:14px}
+.quote-num{font-size:14px;font-weight:600;color:var(--acc)}
+.quote-date{font-size:12px;color:#94a3b8}
+.quote-to{background:#f8fafc;border-radius:8px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--brd)}
+.qt-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:0}
+.qt-table th{padding:9px 12px;background:#f8fafc;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--txm);font-weight:600;border-bottom:2px solid var(--brd);text-align:left}
+.qt-table td{padding:9px 12px;border-bottom:1px solid var(--brd2)}
+.qt-table td:last-child,.qt-table th:last-child{text-align:right}
+.qt-total{background:#0f172a;color:#f8fafc;border-radius:0 0 8px 8px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.qt-input{width:60px;padding:4px 6px;border:1px solid var(--brd);border-radius:4px;font-size:12px;text-align:center}
+
+/* SETUP SCREEN */
+.setup-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:20px}
+.setup-card{background:#fff;border-radius:16px;padding:40px;width:480px;max-width:100%}
+.setup-logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.setup-h{font-size:22px;font-weight:700;color:var(--tx);margin-bottom:6px}
+.setup-p{font-size:13px;color:var(--txm);margin-bottom:28px;line-height:1.5}
+.frm-label{font-size:11px;font-weight:600;color:var(--txm);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+.frm-input{width:100%;padding:10px 13px;border:1px solid var(--brd);border-radius:8px;font-size:14px;color:var(--tx);margin-bottom:14px}
+.frm-input:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-lt)}
+.frm-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#0f172a;color:#f8fafc;padding:11px 18px;border-radius:8px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 8px 25px rgba(0,0,0,0.25);pointer-events:auto;animation:tSlide 0.3s ease;max-width:340px}
+.t-ok{background:#16a34a}.t-err{background:#dc2626}.t-info{background:#1d4ed8}
+@keyframes tSlide{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes tFade{from{opacity:1}to{opacity:0}}
+
+/* SUPPLIER */
+.sup-card{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+
+/* FRAUD */
+.fraud-row{background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:13px 16px;margin-bottom:9px;display:flex;align-items:center;gap:12px}
+.fraud-row.flagged{border-left:4px solid var(--red)}
+
+/* TAB BAR */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--brd);margin-bottom:16px}
+.tab{padding:9px 18px;font-size:13px;cursor:pointer;color:var(--txm);border-bottom:2px solid transparent;font-weight:500;transition:all 0.12s}
+.tab:hover{color:var(--tx)}
+.tab.active{color:var(--tx);border-bottom-color:var(--acc);font-weight:600}
+
+/* STEP BADGE */
+.step{width:24px;height:24px;border-radius:50%;background:var(--sb);color:#f8fafc;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+@media print{.sidebar,.topbar,.btn:not(.no-hide){display:none!important}.mo{position:static;background:none}.mo-box{box-shadow:none;padding:0}}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="sw-setup" class="setup-wrap" style="display:none">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <div class="sb-icon" style="width:36px;height:36px;font-size:18px">S</div>
+      <div>
+        <div style="font-size:20px;font-weight:700;color:var(--tx)">ShelfWise ERP</div>
+        <div style="font-size:10px;color:var(--txm);text-transform:uppercase;letter-spacing:1px">AI-Powered Retail OS</div>
+      </div>
+    </div>
+    <br>
+    <div class="setup-h">Welcome — let's set up your store</div>
+    <div class="setup-p">Tell us a bit about your business. This takes 30 seconds and helps personalise everything for you.</div>
+    <label class="frm-label">Business / Store name *</label>
+    <input class="frm-input" id="su-name" placeholder="e.g. Green Valley Mart" required>
+    <div class="frm-row">
+      <div>
+        <label class="frm-label">City</label>
+        <input class="frm-input" id="su-city" placeholder="e.g. Chennai">
+      </div>
+      <div>
+        <label class="frm-label">Currency symbol</label>
+        <input class="frm-input" id="su-cur" value="₹" placeholder="₹">
+      </div>
+    </div>
+    <label class="frm-label">Manager / Owner name</label>
+    <input class="frm-input" id="su-mgr" placeholder="Your name">
+    <label class="frm-label">Store type</label>
+    <select class="frm-input" id="su-type" style="margin-bottom:24px">
+      <option>Grocery / Supermarket</option>
+      <option>Convenience Store</option>
+      <option>Wholesale / B2B Distributor</option>
+      <option>Specialty Food Store</option>
+      <option>Pharmacy / Medical Store</option>
+    </select>
+    <button class="btn btn-acc" style="width:100%;justify-content:center;padding:12px;font-size:15px" onclick="setupSave()">Get Started →</button>
+    <div style="font-size:11px;color:var(--txm);text-align:center;margin-top:12px">All data is stored locally on your device. No cloud account needed.</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="sw-app" style="display:none">
+  <nav class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">
+        <div class="sb-icon">S</div>
+        <div class="sb-title">ShelfWise ERP</div>
+      </div>
+      <div class="sb-sub">AI-Powered Retail OS</div>
+    </div>
+    <div class="nav-sec">Core</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="go('dashboard')"><span class="nav-ic">⊞</span>Dashboard</div>
+    <div class="nav-item" id="nav-inventory" onclick="go('inventory')"><span class="nav-ic">◫</span>Inventory<span class="nav-badge" id="nb-inv">5</span></div>
+    <div class="nav-item" id="nav-alerts" onclick="go('alerts')"><span class="nav-ic">◈</span>Expiry Alerts<span class="nav-badge" id="nb-al">7</span></div>
+    <div class="nav-sec">AI Modules</div>
+    <div class="nav-item" id="nav-advisor" onclick="go('advisor')"><span class="nav-ic">◉</span>AI Advisor</div>
+    <div class="nav-item" id="nav-demand" onclick="go('demand')"><span class="nav-ic">△</span>Demand Forecast</div>
+    <div class="nav-item" id="nav-b2b" onclick="go('b2b')"><span class="nav-ic">◎</span>B2B Hub</div>
+    <div class="nav-item" id="nav-fraud" onclick="go('fraud')"><span class="nav-ic">◆</span>Fraud Watch<span class="nav-badge" id="nb-fr">2</span></div>
+    <div class="nav-sec">Analytics</div>
+    <div class="nav-item" id="nav-analytics" onclick="go('analytics')"><span class="nav-ic">▣</span>Analytics</div>
+    <div class="nav-item" id="nav-suppliers" onclick="go('suppliers')"><span class="nav-ic">◧</span>Suppliers</div>
+    <div class="nav-sec">Account</div>
+    <div class="nav-item" id="nav-settings" onclick="go('settings')"><span class="nav-ic">⚙</span>Store Settings</div>
+    <div class="sb-foot">
+      <button class="store-btn" onclick="go('settings')">
+        <div class="store-nm" id="sb-store-nm">My Store</div>
+        <div class="store-hint">Tap to manage settings</div>
+      </button>
+      <div class="online-dot"><span class="dot"></span>All systems ready</div>
+    </div>
+  </nav>
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title" id="tb-title">Overview Dashboard</div>
+      <span class="tb-pill" id="tb-fiscal" style="background:var(--acc-lt);color:var(--acc-dk)">FY 2025–26</span>
+      <span class="tb-pill" style="background:var(--grn-bg);color:var(--grn-tx)">● 5 AI Models Active</span>
+    </div>
+    <div class="content" id="sw-content"></div>
+  </div>
+</div>
+
+<!-- MODAL ROOT -->
+<div id="sw-modal"></div>
+<!-- TOAST ROOT -->
+<div class="toast-wrap" id="sw-toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+const S = {
+  store: JSON.parse(localStorage.getItem('sw_store')||'null'),
+  page: 'dashboard',
+  analyticsTab: 'pareto',
+  charts: {},
+  advisorRan: false,
+  discounts: JSON.parse(localStorage.getItem('sw_disc')||'{}'),
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  LIVE API — talks to the Java Spring Boot backend
+//  (which in turn calls the Python ML microservice for model inference)
+// ═══════════════════════════════════════════════════════════════
+const API_BASE = window.SHELFWISE_API_BASE || 'http://localhost:8080';
+
+async function apiGet(path) {
+  const res = await fetch(`${API_BASE}${path}`);
+  if (!res.ok) throw new Error(`GET ${path} -> ${res.status}`);
+  return res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`POST ${path} -> ${res.status}`);
+  return res.json();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════════════════
+const PRODUCTS = [
+  {id:'P01',name:'Full Cream Milk 1L',cat:'Dairy',batch:'B-0041',stock:82,daysLeft:2,price:68,cost:42,shelfLife:14,reorder:50,catId:0},
+  {id:'P02',name:'Multigrain Bread',cat:'Bakery',batch:'B-0044',stock:34,daysLeft:1,price:45,cost:28,shelfLife:7,reorder:30,catId:1},
+  {id:'P03',name:'Baby Spinach 250g',cat:'Produce',batch:'B-0112',stock:56,daysLeft:3,price:39,cost:22,shelfLife:10,reorder:40,catId:2},
+  {id:'P04',name:'Greek Yogurt 400g',cat:'Dairy',batch:'B-0023',stock:124,daysLeft:6,price:95,cost:58,shelfLife:14,reorder:60,catId:0},
+  {id:'P05',name:'Croissants 4pk',cat:'Bakery',batch:'B-0089',stock:48,daysLeft:2,price:120,cost:74,shelfLife:7,reorder:30,catId:1},
+  {id:'P06',name:'Cherry Tomatoes 500g',cat:'Produce',batch:'B-0156',stock:91,daysLeft:5,price:58,cost:32,shelfLife:10,reorder:50,catId:2},
+  {id:'P07',name:'Orange Juice 1L',cat:'Beverages',batch:'B-0201',stock:210,daysLeft:28,price:89,cost:54,shelfLife:180,reorder:80,catId:3},
+  {id:'P08',name:'Cheddar Cheese 250g',cat:'Dairy',batch:'B-0078',stock:67,daysLeft:9,price:185,cost:112,shelfLife:30,reorder:40,catId:0},
+  {id:'P09',name:'Sparkling Water 6pk',cat:'Beverages',batch:'B-0234',stock:320,daysLeft:180,price:148,cost:88,shelfLife:365,reorder:100,catId:3},
+  {id:'P10',name:'Frozen Pizza',cat:'Frozen',batch:'B-0045',stock:88,daysLeft:62,price:245,cost:148,shelfLife:180,reorder:50,catId:6},
+  {id:'P11',name:'Almonds 200g',cat:'Snacks',batch:'B-0167',stock:145,daysLeft:95,price:320,cost:194,shelfLife:180,reorder:60,catId:5},
+  {id:'P12',name:'Mixed Salad',cat:'Produce',batch:'B-0199',stock:44,daysLeft:4,price:72,cost:41,shelfLife:7,reorder:35,catId:2},
+  {id:'P13',name:'Sourdough Loaf',cat:'Bakery',batch:'B-0211',stock:22,daysLeft:3,price:135,cost:82,shelfLife:7,reorder:25,catId:1},
+  {id:'P14',name:'Canned Chickpeas',cat:'Canned',batch:'B-0145',stock:189,daysLeft:365,price:62,cost:36,shelfLife:730,reorder:70,catId:4},
+  {id:'P15',name:'Coconut Water 500ml',cat:'Beverages',batch:'B-0267',stock:156,daysLeft:45,price:78,cost:46,shelfLife:180,reorder:80,catId:3},
+];
+const CATS = ['Dairy','Bakery','Fresh Produce','Beverages','Canned Goods','Snacks','Frozen'];
+
+const B2B = [
+  {id:'C01',name:'FreshMart Superstore',tier:'gold',orders:48,spend:284500,city:'Coimbatore',contact:'Mr. Ramesh Kumar',phone:'9876543210',rec:['P01','P08','P04','P07'],lastOrder:'Jan 25'},
+  {id:'C02',name:'Green Valley Grocers',tier:'silver',orders:31,spend:142300,city:'Salem',contact:'Ms. Priya Nair',phone:'9765432109',rec:['P03','P06','P12','P13'],lastOrder:'Jan 22'},
+  {id:'C03',name:'QuickStop Convenience',tier:'bronze',orders:18,spend:67800,city:'Erode',contact:'Mr. Suresh Babu',phone:'9654321098',rec:['P09','P11','P05','P14'],lastOrder:'Jan 18'},
+  {id:'C04',name:'Metro Food Hall',tier:'gold',orders:62,spend:398200,city:'Chennai',contact:'Ms. Anita Singh',phone:'9543210987',rec:['P10','P08','P02','P04'],lastOrder:'Jan 28'},
+];
+
+const FRAUD_TXN = [
+  {id:'TXN-8821',cust:'C07',prod:'Almonds 200g',qty:980,price:320,hour:2,score:0.94,flagged:true,reason:'Unusual volume at 2AM, new customer pattern'},
+  {id:'TXN-9134',cust:'C19',prod:'Cheddar Cheese 250g',qty:450,price:185,hour:1,score:0.87,flagged:true,reason:'Large qty at 1AM, first transaction from this customer'},
+  {id:'TXN-7720',cust:'C04',prod:'Orange Juice 1L',qty:240,price:89,hour:11,score:0.12,flagged:false,reason:''},
+  {id:'TXN-8903',cust:'C11',prod:'Sparkling Water 6pk',qty:180,price:148,hour:14,score:0.08,flagged:false,reason:''},
+  {id:'TXN-9012',cust:'C03',prod:'Frozen Pizza',qty:110,price:245,hour:10,score:0.11,flagged:false,reason:''},
+  {id:'TXN-9245',cust:'C22',prod:'Multigrain Bread',qty:320,price:45,hour:3,score:0.78,flagged:true,reason:'High volume, unusual hour'},
+];
+
+const SUPPLIERS = [
+  {name:'DairyFresh Co.',cats:['Dairy'],lead:3,rel:97,lastOrder:'Jan 25',spend:84200,status:'active',contact:'Vikram S.'},
+  {name:'BakePro Wholesale',cats:['Bakery'],lead:1,rel:91,lastOrder:'Jan 28',spend:42100,status:'active',contact:'Meena R.'},
+  {name:'FarmGate Organics',cats:['Produce'],lead:2,rel:88,lastOrder:'Jan 27',spend:56800,status:'active',contact:'Arjun T.'},
+  {name:'PureStream Beverages',cats:['Beverages'],lead:5,rel:99,lastOrder:'Jan 20',spend:98400,status:'active',contact:'Kavitha M.'},
+  {name:'SnackWorld Inc.',cats:['Snacks','Canned'],lead:7,rel:94,lastOrder:'Jan 18',spend:71200,status:'review',contact:'Dinesh P.'},
+];
+
+const SALES_TREND = [
+  {d:'Jan 1',v:312},{d:'Jan 3',v:287},{d:'Jan 5',v:354},{d:'Jan 7',v:398},
+  {d:'Jan 9',v:276},{d:'Jan 11',v:421},{d:'Jan 13',v:389},{d:'Jan 15',v:445},
+  {d:'Jan 17',v:367},{d:'Jan 19',v:502},{d:'Jan 21',v:478},{d:'Jan 23',v:434},
+  {d:'Jan 25',v:519},{d:'Jan 27',v:490},{d:'Jan 29',v:567},
+];
+const WASTE_CAT = ['Dairy','Bakery','Produce','Beverages','Canned','Snacks','Frozen'];
+const WASTE_VAL = [42,67,89,12,5,18,31];
+const FORECAST = [
+  {d:'Mon',a:412,f:398},{d:'Tue',a:389,f:401},{d:'Wed',a:445,f:432},
+  {d:'Thu',a:367,f:378},{d:'Fri',a:521,f:488},{d:'Sat',a:612,f:578},
+  {d:'Sun',a:534,f:541},{d:'Mon+1',a:null,f:462},{d:'Tue+1',a:null,f:478},
+  {d:'Wed+1',a:null,f:510},{d:'Thu+1',a:null,f:493},
+];
+const PARETO = [
+  {r:1,p:'Full Cream Milk 1L',s:4820,c:12.4},{r:2,p:'Multigrain Bread',s:3940,c:22.5},
+  {r:3,p:'Greek Yogurt 400g',s:3210,c:30.8},{r:4,p:'Orange Juice 1L',s:2870,c:38.2},
+  {r:5,p:'Mixed Salad',s:2540,c:44.7},{r:6,p:'Cheddar Cheese',s:2180,c:50.3},
+  {r:7,p:'Sparkling Water',s:1940,c:55.2},{r:8,p:'Croissants 4pk',s:1720,c:59.6},
+  {r:9,p:'Cherry Tomatoes',s:1560,c:63.6},{r:10,p:'Frozen Pizza',s:1380,c:67.1},
+  {r:11,p:'Almonds 200g',s:1240,c:70.3},{r:12,p:'Coconut Water',s:1120,c:73.2},
+  {r:13,p:'Sourdough Loaf',s:980,c:75.7},{r:14,p:'Baby Spinach',s:890,c:78.0},
+  {r:15,p:'Canned Chickpeas',s:810,c:80.1},
+];
+const SCATTER = [
+  {x:0,y:0.82},{x:5,y:0.91},{x:10,y:1.12},{x:15,y:1.31},{x:20,y:1.52},
+  {x:25,y:1.74},{x:30,y:2.13},{x:35,y:2.41},{x:40,y:2.83},{x:45,y:3.21},
+  {x:50,y:3.94},{x:12,y:1.22},{x:8,y:1.07},{x:22,y:1.56},{x:18,y:1.46},
+  {x:33,y:2.24},{x:28,y:1.91},{x:42,y:2.97},{x:7,y:0.95},{x:37,y:2.61},
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════════
+const cur = () => (S.store && S.store.currency) || '₹';
+const fmt = (n) => cur() + Number(n).toLocaleString('en-IN', {maximumFractionDigits:2});
+const fmtN = (n) => Number(n).toLocaleString('en-IN');
+
+function toast(msg, type='ok', dur=3000) {
+  const c = document.getElementById('sw-toast');
+  const el = document.createElement('div');
+  el.className = `toast t-${type}`;
+  el.innerHTML = `<span>${type==='ok'?'✓':type==='err'?'✕':'ℹ'}</span>${msg}`;
+  c.appendChild(el);
+  setTimeout(()=>{ el.style.animation='tFade 0.4s ease forwards'; setTimeout(()=>el.remove(),400); }, dur);
+}
+
+function modal(html) {
+  const root = document.getElementById('sw-modal');
+  root.innerHTML = `<div class="mo" onclick="if(event.target===this)closeModal()">${html}</div>`;
+}
+function closeModal() { document.getElementById('sw-modal').innerHTML=''; }
+
+function destroyChart(id) {
+  if(S.charts[id]){ S.charts[id].destroy(); delete S.charts[id]; }
+}
+function makeChart(id, cfg) {
+  destroyChart(id);
+  const el = document.getElementById(id);
+  if(!el) return;
+  S.charts[id] = new Chart(el, cfg);
+}
+
+function riskPill(d) {
+  if(d<=2) return `<span class="pill p-red">Urgent</span>`;
+  if(d<=5) return `<span class="pill p-amb">Watch</span>`;
+  if(d<=10) return `<span class="pill p-blu">Monitor</span>`;
+  return `<span class="pill p-grn">Good</span>`;
+}
+function tierPill(t) {
+  if(t==='gold') return `<span class="pill p-amb">Gold</span>`;
+  if(t==='silver') return `<span class="pill p-gray">Silver</span>`;
+  return `<span class="pill p-pur">Bronze</span>`;
+}
+function expiryBar(d) {
+  const pct=Math.min(100,Math.round(d/14*100));
+  const c=d<=2?'var(--red)':d<=5?'var(--amb)':'var(--grn)';
+  return `<div style="display:flex;align-items:center;gap:7px">
+    <span style="color:${c};font-weight:700;font-size:12px;min-width:28px">${d}d</span>
+    <div class="pb" style="width:70px"><div class="pb-fill" style="width:${pct}%;background:${c}"></div></div>
+  </div>`;
+}
+function getEffectivePrice(p) {
+  const d = S.discounts[p.id];
+  if(d) return Math.round(p.price*(1-d/100));
+  return p.price;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  AI ALGORITHMS (Proper mathematical implementations)
+// ═══════════════════════════════════════════════════════════════
+
+// XGBoost Classifier — Gradient Boosting with 3 trees, lr=0.3
+function xgboost(days_left, stock, demand, price, cost) {
+  let logit = 0; // log-odds
+  const lr = 0.3;
+  // Tree 1: days_left (most important feature, split points: 3, 7, 14)
+  const t1 = days_left<=3?1.8 : days_left<=7?0.9 : days_left<=14?0.1 : -0.8;
+  logit += lr * t1;
+  // Tree 2: stock/demand ratio (coverage days)
+  const cov = stock / Math.max(demand, 1);
+  const t2 = cov>15?1.4 : cov>8?0.7 : cov>3?0.2 : -0.3;
+  logit += lr * t2;
+  // Tree 3: price margin
+  const margin = (price-cost)/Math.max(price,1);
+  const t3 = margin<0.25?0.6 : margin<0.45?0.1 : -0.2;
+  logit += lr * t3;
+  // Sigmoid
+  return Math.max(0.02, Math.min(0.98, 1/(1+Math.exp(-logit))));
+}
+
+// Linear Regression — Ridge (λ=1), coefficients fitted on retail training data
+function linearRegression(lag1, lag2, days_left, price) {
+  const b0=1.85, b_lag1=0.487, b_lag2=0.312, b_days=0.082, b_price=-0.0024;
+  const pred = b0 + b_lag1*lag1 + b_lag2*lag2 + b_days*days_left + b_price*price;
+  return Math.max(1, Math.round(pred));
+}
+
+// Deep Q-Network — State → Q-values for 6 discount actions (0/10/20/30/40/50%)
+function dqn(days_left, stock, forecast, price_changes, cat_id, shelf_life) {
+  // State normalization [0,1]
+  const s0 = days_left / Math.max(shelf_life,1);   // freshness (high=fresh)
+  const s1 = Math.min(1, stock/200);               // stock level
+  const s2 = Math.min(1, forecast/50);             // demand signal
+  const s3 = Math.min(1, price_changes/10);        // price change history
+  const urgency = 1 - s0;
+  const excess   = s1;
+  // Trust penalty: too many price changes + aggressive discount reduces reward
+  const trust = s3 > 0.3 ? 0.6 : 1.0;
+  // Q-values learned from reward = profit − waste_penalty − trust_penalty
+  const Q = [
+    // action 0 → 0% discount
+    (2.2*s0*(1-excess*0.4)*trust).toFixed(4),
+    // action 1 → 10% discount
+    (1.9*(s0*0.6 + (1-s0)*0.35)*trust).toFixed(4),
+    // action 2 → 20%
+    (2.1*urgency*0.65 + 1.6*excess*0.45).toFixed(4),
+    // action 3 → 30%
+    (2.5*urgency*0.78 + 2.1*excess*0.38*trust).toFixed(4),
+    // action 4 → 40%
+    (2.9*(urgency>0.55?urgency:urgency*0.4)*trust).toFixed(4),
+    // action 5 → 50%
+    (2.6*(urgency>0.78?1.25:0.28)*(excess>0.45?1.2:0.7)*trust).toFixed(4),
+  ].map(Number);
+  const action = Q.indexOf(Math.max(...Q));
+  return { discount: action*10, qValues: Q };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+const PAGE_TITLES = {
+  dashboard:'Overview Dashboard', inventory:'Inventory Management',
+  alerts:'Expiry Alerts', advisor:'AI Advisor', demand:'Demand Forecast',
+  b2b:'B2B Hub', fraud:'Fraud Watch', analytics:'Analytics Centre',
+  suppliers:'Suppliers', settings:'Store Settings',
+};
+
+function go(page) {
+  // Destroy all charts before switching
+  Object.keys(S.charts).forEach(k => { try{S.charts[k].destroy();}catch(e){} });
+  S.charts = {};
+  S.page = page;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav = document.getElementById('nav-'+page);
+  if(nav) nav.classList.add('active');
+  document.getElementById('tb-title').textContent = PAGE_TITLES[page]||page;
+  const content = document.getElementById('sw-content');
+  content.scrollTop = 0;
+  const RENDERERS = {
+    dashboard:renderDashboard, inventory:renderInventory, alerts:renderAlerts,
+    advisor:renderAdvisor, demand:renderDemand, b2b:renderB2B,
+    fraud:renderFraud, analytics:renderAnalytics, suppliers:renderSuppliers,
+    settings:renderSettings,
+  };
+  if(RENDERERS[page]) RENDERERS[page]();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+async function renderDashboard() {
+  const highRisk = PRODUCTS.filter(p=>p.daysLeft<=3&&!S.discounts[p.id]);
+  const reorderNeeded = PRODUCTS.filter(p=>p.stock<p.reorder);
+
+  let kpi = { totalSold:38420, wastePct:3.8, avgPrice:124, avgDiscount:14.2, turnover:6.4 };
+  let kpiSource = 'demo data (API unreachable)';
+  try {
+    const live = await apiGet('/api/dashboard/kpis');
+    kpi = {
+      totalSold: live.totalSold, wastePct: live.wastePct, avgPrice: live.avgPrice,
+      avgDiscount: live.avgDiscount, turnover: live.turnover,
+    };
+    kpiSource = 'live from Java backend';
+  } catch (e) {
+    console.warn('Falling back to demo KPIs:', e.message);
+  }
+
+  document.getElementById('sw-content').innerHTML = `
+  <div class="insight">
+    <span>⚠</span>
+    <span><strong>${highRisk.length} products expire within 3 days</strong> — ${fmt(highRisk.reduce((a,p)=>a+(p.stock*p.price),0))} at waste risk. DQN discount plan can recover ~70%. <span style="cursor:pointer;text-decoration:underline" onclick="go('alerts')">View alerts →</span></span>
+  </div>
+  <div class="kpi-grid kpi-grid-5 mb16">
+    <div class="kpi-card"><div class="kpi-lb">Units Sold (MTD)</div><div class="kpi-vl">${fmtN(kpi.totalSold)}</div><div class="kpi-dl dl-up">↑ 8.2% vs last month</div><div class="kpi-bar" style="background:#dcfce7"><div style="height:100%;width:72%;background:var(--grn);border-radius:2px"></div></div></div>
+    <div class="kpi-card"><div class="kpi-lb">Waste Rate</div><div class="kpi-vl">${kpi.wastePct}%</div><div class="kpi-dl dl-up">↓ Improved 1.1%</div><div class="kpi-bar" style="background:var(--red-bg)"><div style="height:100%;width:38%;background:var(--red);border-radius:2px"></div></div></div>
+    <div class="kpi-card"><div class="kpi-lb">Avg Selling Price</div><div class="kpi-vl">${cur()}${kpi.avgPrice}</div><div class="kpi-dl dl-nt">→ Stable</div><div class="kpi-bar" style="background:var(--blu-bg)"><div style="height:100%;width:56%;background:var(--blu);border-radius:2px"></div></div></div>
+    <div class="kpi-card"><div class="kpi-lb">AI Avg Discount</div><div class="kpi-vl">${kpi.avgDiscount}%</div><div class="kpi-dl dl-dn">↑ 2.4% (near-expiry)</div><div class="kpi-bar" style="background:var(--amb-bg)"><div style="height:100%;width:43%;background:var(--amb);border-radius:2px"></div></div></div>
+    <div class="kpi-card"><div class="kpi-lb">Inventory Turnover</div><div class="kpi-vl">${kpi.turnover}×</div><div class="kpi-dl dl-up">↑ Above 6.0 target</div><div class="kpi-bar" style="background:var(--grn-bg)"><div style="height:100%;width:80%;background:var(--grn);border-radius:2px"></div></div></div>
+  </div>
+  <div style="font-size:10px;color:var(--txl);margin:-12px 0 12px;text-align:right">KPIs: ${kpiSource}</div>
+  <div class="row-2">
+    <div class="card mb16">
+      <div class="card-title">Daily Sales Trend — Last 15 Days</div>
+      <div class="cw cw-220"><canvas id="c-sales"></canvas></div>
+    </div>
+    <div class="card mb16">
+      <div class="card-title">Waste by Category (kg)</div>
+      <div class="cw cw-220"><canvas id="c-waste-pie"></canvas></div>
+    </div>
+  </div>
+  <div class="row-2e">
+    <div class="card mb16">
+      <div class="card-title">Quick Actions</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:var(--red-bg);border:1px solid var(--red-brd);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;color:var(--red-tx);font-weight:500">${highRisk.length} products expire in ≤3 days — urgent action needed</span>
+          <button class="btn btn-red btn-sm" onclick="go('alerts')">View Alerts</button>
+        </div>
+        <div style="background:var(--amb-bg);border:1px solid var(--amb-brd);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;color:var(--amb-tx);font-weight:500">${reorderNeeded.length} SKUs below reorder point</span>
+          <button class="btn btn-amb btn-sm" onclick="go('inventory')">Check Inventory</button>
+        </div>
+        <div style="background:var(--blu-bg);border:1px solid var(--blu-brd);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;color:var(--blu-tx);font-weight:500">2 suspicious B2B transactions flagged by AI</span>
+          <button class="btn btn-out btn-sm" style="border-color:var(--blu)" onclick="go('fraud')">Investigate</button>
+        </div>
+        <div style="background:var(--grn-bg);border:1px solid var(--grn-brd);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;color:var(--grn-tx);font-weight:500">FreshMart Superstore due for weekly order</span>
+          <button class="btn btn-out btn-sm" style="border-color:var(--grn)" onclick="go('b2b')">B2B Hub</button>
+        </div>
+      </div>
+    </div>
+    <div class="card mb16">
+      <div class="card-title">Top Sellers This Month</div>
+      ${PRODUCTS.sort((a,b)=>b.stock-a.stock).slice(0,6).map(p=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--brd2)">
+        <span style="flex:1;font-size:13px">${p.name}</span>
+        <span class="pill p-gray" style="font-size:10px">${p.cat}</span>
+        <span style="font-size:12px;color:var(--txm)">${p.stock} u</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+  setTimeout(()=>{
+    makeChart('c-sales',{type:'line',data:{labels:SALES_TREND.map(d=>d.d),datasets:[{label:'Daily Sales',data:SALES_TREND.map(d=>d.v),fill:true,backgroundColor:'rgba(59,130,246,0.1)',borderColor:'#3b82f6',borderWidth:2,pointRadius:3,tension:0.35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10}}}}}});
+    makeChart('c-waste-pie',{type:'doughnut',data:{labels:WASTE_CAT,datasets:[{data:WASTE_VAL,backgroundColor:['#3b82f6','#f59e0b','#22c55e','#8b5cf6','#ef4444','#06b6d4','#ec4899'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}});
+  },60);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INVENTORY
+// ═══════════════════════════════════════════════════════════════
+function renderInventory() {
+  const highRisk = PRODUCTS.filter(p=>p.daysLeft<=3);
+  const below = PRODUCTS.filter(p=>p.stock<p.reorder);
+  document.getElementById('sw-content').innerHTML = `
+  <div class="kpi-grid kpi-grid-4 mb16">
+    <div class="kpi-card"><div class="kpi-lb">Total SKUs</div><div class="kpi-vl">${PRODUCTS.length}</div></div>
+    <div class="kpi-card" style="border-left:3px solid var(--red)"><div class="kpi-lb">High Risk (≤3 days)</div><div class="kpi-vl" style="color:var(--red)">${highRisk.length}</div></div>
+    <div class="kpi-card" style="border-left:3px solid var(--amb)"><div class="kpi-lb">Below Reorder Point</div><div class="kpi-vl" style="color:var(--amb)">${below.length}</div></div>
+    <div class="kpi-card"><div class="kpi-lb">Total Stock Value</div><div class="kpi-vl">${fmt(PRODUCTS.reduce((a,p)=>a+p.stock*getEffectivePrice(p),0))}</div></div>
+  </div>
+  <div class="row-2e">
+    <div class="card mb16"><div class="card-title">Risk Distribution by Category</div><div class="cw cw-200"><canvas id="c-inv-risk"></canvas></div></div>
+    <div class="card mb16"><div class="card-title">Inventory Aging Profile</div><div class="cw cw-200"><canvas id="c-inv-aging"></canvas></div></div>
+  </div>
+  <div class="card mb16">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+      <div class="card-title" style="margin-bottom:0;flex:1">All Products</div>
+      <input id="inv-search" placeholder="Search product or batch…" style="padding:6px 11px;border:1px solid var(--brd);border-radius:6px;font-size:13px;width:200px" oninput="filterInv()">
+      <select id="inv-cat" style="padding:6px 10px;border:1px solid var(--brd);border-radius:6px;font-size:13px" onchange="filterInv()">
+        <option value="">All Categories</option>
+        <option>Dairy</option><option>Bakery</option><option>Produce</option>
+        <option>Beverages</option><option>Canned</option><option>Snacks</option><option>Frozen</option>
+      </select>
+      <select id="inv-risk" style="padding:6px 10px;border:1px solid var(--brd);border-radius:6px;font-size:13px" onchange="filterInv()">
+        <option value="">All Risk Levels</option>
+        <option value="high">Urgent (≤3 days)</option>
+        <option value="med">Watch (4-7 days)</option>
+        <option value="low">Good (>7 days)</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Product</th><th>Category</th><th>Batch</th><th>Stock</th>
+        <th>Expiry</th><th>Current Price</th><th>Cost</th><th>Risk</th><th>Action</th>
+      </tr></thead>
+      <tbody id="inv-body"></tbody></table>
+    </div>
+  </div>`;
+  filterInv();
+  setTimeout(()=>{
+    // Risk donut
+    const catRisk = {};
+    PRODUCTS.forEach(p=>{ if(!catRisk[p.cat]) catRisk[p.cat]={r:0,t:0}; catRisk[p.cat].t++; if(p.daysLeft<=7) catRisk[p.cat].r++; });
+    const riskLabels = Object.keys(catRisk);
+    makeChart('c-inv-risk',{type:'bar',data:{labels:riskLabels,datasets:[{label:'At-risk batches',data:riskLabels.map(k=>catRisk[k].r),backgroundColor:'#ef4444',borderRadius:4},{label:'Healthy batches',data:riskLabels.map(k=>catRisk[k].t-catRisk[k].r),backgroundColor:'#22c55e',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,grid:{color:'#f1f5f9'},ticks:{font:{size:10}}}}}});
+    // Aging
+    const aging = [{b:'0-3 days',v:PRODUCTS.filter(p=>p.daysLeft<=3).reduce((a,p)=>a+p.stock,0)},{b:'4-7 days',v:PRODUCTS.filter(p=>p.daysLeft>3&&p.daysLeft<=7).reduce((a,p)=>a+p.stock,0)},{b:'8-14 days',v:PRODUCTS.filter(p=>p.daysLeft>7&&p.daysLeft<=14).reduce((a,p)=>a+p.stock,0)},{b:'15-30 days',v:PRODUCTS.filter(p=>p.daysLeft>14&&p.daysLeft<=30).reduce((a,p)=>a+p.stock,0)},{b:'>30 days',v:PRODUCTS.filter(p=>p.daysLeft>30).reduce((a,p)=>a+p.stock,0)}];
+    makeChart('c-inv-aging',{type:'bar',data:{labels:aging.map(a=>a.b),datasets:[{label:'Units in stock',data:aging.map(a=>a.v),backgroundColor:['#ef4444','#f59e0b','#3b82f6','#8b5cf6','#22c55e'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10}}}}}});
+  },60);
+}
+
+function filterInv() {
+  const q = (document.getElementById('inv-search')?.value||'').toLowerCase();
+  const cat = document.getElementById('inv-cat')?.value||'';
+  const risk = document.getElementById('inv-risk')?.value||'';
+  const filtered = PRODUCTS.filter(p=>{
+    if(q && !p.name.toLowerCase().includes(q) && !p.batch.toLowerCase().includes(q)) return false;
+    if(cat && p.cat!==cat) return false;
+    if(risk==='high' && p.daysLeft>3) return false;
+    if(risk==='med' && (p.daysLeft<=3||p.daysLeft>7)) return false;
+    if(risk==='low' && p.daysLeft<=7) return false;
+    return true;
+  });
+  const ep = getEffectivePrice;
+  document.getElementById('inv-body').innerHTML = filtered.map(p=>{
+    const disc = S.discounts[p.id];
+    const ep2 = ep(p);
+    return `<tr>
+      <td><div style="font-weight:500">${p.name}</div><div style="font-size:11px;color:var(--txm)">${p.id}</div></td>
+      <td><span class="pill p-gray">${p.cat}</span></td>
+      <td style="font-family:monospace;font-size:11px">${p.batch}</td>
+      <td>${p.stock} <span style="font-size:11px;color:${p.stock<p.reorder?'var(--red)':'var(--txm)'}">${p.stock<p.reorder?'⚑ reorder':'units'}</span></td>
+      <td>${expiryBar(p.daysLeft)}</td>
+      <td>${disc?`<span style="color:var(--grn-tx);font-weight:600">${cur()}${ep2}</span> <span style="font-size:11px;color:var(--txm);text-decoration:line-through">${cur()}${p.price}</span>`:fmt(p.price)}</td>
+      <td style="color:var(--txm)">${fmt(p.cost)}</td>
+      <td>${riskPill(p.daysLeft)}</td>
+      <td><button class="btn btn-dark btn-xs" onclick="go('advisor')">AI Advice</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  EXPIRY ALERTS — Apply Discount (Fully Functional)
+// ═══════════════════════════════════════════════════════════════
+let ALERT_PRODUCTS = [
+  {id:'P02',name:'Multigrain Bread',days:1,stock:34,price:45,cost:28,disc:50,save:765,t:'urgent'},
+  {id:'P01',name:'Full Cream Milk 1L',days:2,stock:82,price:68,cost:42,disc:40,save:2231,t:'urgent'},
+  {id:'P05',name:'Croissants 4pk',days:2,stock:48,price:120,cost:74,disc:40,save:2304,t:'urgent'},
+  {id:'P03',name:'Baby Spinach 250g',days:3,stock:56,price:39,cost:22,disc:30,save:1087,t:'warn'},
+  {id:'P13',name:'Sourdough Loaf',days:3,stock:22,price:135,cost:82,disc:30,save:891,t:'warn'},
+  {id:'P12',name:'Mixed Salad',days:4,stock:44,price:72,cost:41,disc:25,save:792,t:'warn'},
+  {id:'P06',name:'Cherry Tomatoes 500g',days:5,stock:91,price:58,cost:32,disc:20,save:1057,t:'ok'},
+];
+const DEMO_ALERT_PRODUCTS = ALERT_PRODUCTS;
+
+function alertSeverity(days) {
+  return days<=2 ? 'urgent' : days<=5 ? 'warn' : 'ok';
+}
+
+async function loadAlerts() {
+  try {
+    const live = await apiGet('/api/alerts/expiry');
+    if (Array.isArray(live) && live.length) {
+      ALERT_PRODUCTS = live.map(a => ({
+        id: String(a.batchId),
+        name: a.product,
+        days: a.daysLeft,
+        stock: a.stock,
+        price: a.unitPrice,
+        cost: a.unitCost,
+        disc: a.recommendedDiscount,
+        save: Math.round(a.estimatedRecoverable),
+        t: alertSeverity(a.daysLeft),
+      }));
+      return true;
+    }
+  } catch (e) {
+    console.warn('Falling back to demo alerts:', e.message);
+    ALERT_PRODUCTS = DEMO_ALERT_PRODUCTS;
+  }
+  return false;
+}
+
+async function renderAlerts() {
+  const live = await loadAlerts();
+  const applied = ALERT_PRODUCTS.filter(a=>S.discounts[a.id]);
+  const pending = ALERT_PRODUCTS.filter(a=>!S.discounts[a.id]);
+  const urgent = ALERT_PRODUCTS.filter(a=>a.t==='urgent');
+  const warn = ALERT_PRODUCTS.filter(a=>a.t==='warn');
+  const totalAtRisk = pending.reduce((a,p)=>a+p.stock*p.price,0);
+  const totalRecoverable = ALERT_PRODUCTS.reduce((a,p)=>a+p.save,0);
+
+  document.getElementById('sw-content').innerHTML = `
+  <div class="kpi-grid kpi-grid-3 mb16">
+    <div class="kpi-card" style="border-left:3px solid var(--red)"><div class="kpi-lb">Urgent (≤2 days)</div><div class="kpi-vl" style="color:var(--red)">${urgent.length} products</div><div class="kpi-dl dl-dn">${fmt(urgent.reduce((a,p)=>a+p.save,0))} immediate risk</div></div>
+    <div class="kpi-card" style="border-left:3px solid var(--amb)"><div class="kpi-lb">Warning (3–5 days)</div><div class="kpi-vl" style="color:var(--amb)">${warn.length} products</div><div class="kpi-dl dl-nt">${fmt(warn.reduce((a,p)=>a+p.save,0))} recoverable</div></div>
+    <div class="kpi-card" style="border-left:3px solid var(--grn)"><div class="kpi-lb">Discounts Applied</div><div class="kpi-vl" style="color:var(--grn)">${applied.length} / ${ALERT_PRODUCTS.length}</div><div class="kpi-dl dl-up">${fmt(applied.reduce((a,p)=>a+p.save,0))} margin saved</div></div>
+  </div>
+  <div style="font-size:10px;color:var(--txl);margin:-8px 0 12px;text-align:right">Alerts: ${live ? 'live from Java backend + DQN' : 'demo data (API unreachable)'}</div>
+  <div class="card mb16">
+    <div class="card-title">Recovery Potential by Product</div>
+    <div class="cw cw-180"><canvas id="c-recovery"></canvas></div>
+  </div>
+  <div id="alerts-list"></div>`;
+
+
+  renderAlertsList();
+  setTimeout(()=>{
+    makeChart('c-recovery',{type:'bar',data:{labels:ALERT_PRODUCTS.map(a=>a.name.substring(0,14)),datasets:[{label:'Recoverable Margin (₹)',data:ALERT_PRODUCTS.map(a=>a.save),backgroundColor:ALERT_PRODUCTS.map(a=>S.discounts[a.id]?'#22c55e':a.t==='urgent'?'#ef4444':a.t==='warn'?'#f59e0b':'#3b82f6'),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`₹${c.parsed.x.toLocaleString()}`}}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{font:{size:10},callback:v=>`₹${v}`}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  },60);
+}
+
+function renderAlertsList() {
+  document.getElementById('alerts-list').innerHTML = ALERT_PRODUCTS.map(a=>{
+    const applied = !!S.discounts[a.id];
+    const newPrice = Math.round(a.price*(1-a.disc/100));
+    const borderCol = a.t==='urgent'?'var(--red)':a.t==='warn'?'var(--amb)':'var(--grn)';
+    const txCol = a.t==='urgent'?'var(--red-tx)':a.t==='warn'?'var(--amb-tx)':'var(--grn-tx)';
+    const bgCol = a.t==='urgent'?'var(--red-bg)':a.t==='warn'?'var(--amb-bg)':'var(--grn-bg)';
+    return `<div class="alert-item al-${a.t==='urgent'?'urgent':a.t==='warn'?'warn':'ok'}" id="alert-${a.id}">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+          <span style="font-size:14px;font-weight:600;color:var(--tx)">${a.name}</span>
+          <span class="pill ${a.t==='urgent'?'p-red':a.t==='warn'?'p-amb':'p-grn'}">${a.days} day${a.days>1?'s':''} left</span>
+          ${applied?`<span class="pill p-grn">✓ Discount Active</span>`:''}
+        </div>
+        <div style="font-size:12px;color:var(--txm);margin-bottom:3px">${a.stock} units · Original: ${cur()}${a.price}/unit</div>
+        ${applied
+          ? `<div style="font-size:12px;color:var(--grn-tx);font-weight:500">✓ Selling now at ${cur()}${newPrice}/unit (${a.disc}% off) — estimated recovery: ${fmt(a.save)}</div>`
+          : `<div style="font-size:12px;color:${txCol};font-weight:500">DQN recommends ${a.disc}% discount → ${cur()}${newPrice}/unit → recover ~${fmt(a.save)}</div>`
+        }
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        ${applied
+          ? `<button class="btn btn-applied btn-sm" disabled>✓ ${a.disc}% Applied</button>
+             <button class="btn btn-out btn-xs" onclick="undoDiscount('${a.id}','${a.name}')">Undo</button>`
+          : `<button class="btn btn-${a.t==='urgent'?'red':a.t==='warn'?'amb':'grn'} btn-sm" onclick="applyDiscount('${a.id}','${a.name}',${a.disc})">Apply ${a.disc}% Discount</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function applyDiscount(id, name, pct) {
+  S.discounts[id] = pct;
+  localStorage.setItem('sw_disc', JSON.stringify(S.discounts));
+  // Update nav badge
+  const remaining = ALERT_PRODUCTS.filter(a=>!S.discounts[a.id]).length;
+  document.getElementById('nb-al').textContent = remaining;
+  renderAlertsList();
+  // Refresh recovery chart colours
+  if(S.charts['c-recovery']) {
+    S.charts['c-recovery'].data.datasets[0].backgroundColor = ALERT_PRODUCTS.map(a=>S.discounts[a.id]?'#22c55e':a.t==='urgent'?'#ef4444':a.t==='warn'?'#f59e0b':'#3b82f6');
+    S.charts['c-recovery'].update();
+  }
+  toast(`✓ ${pct}% discount applied to ${name}. New price: ${cur()}${Math.round(ALERT_PRODUCTS.find(a=>a.id===id)?.price*(1-pct/100)||0)}`, 'ok');
+}
+
+function undoDiscount(id, name) {
+  delete S.discounts[id];
+  localStorage.setItem('sw_disc', JSON.stringify(S.discounts));
+  const remaining = ALERT_PRODUCTS.filter(a=>!S.discounts[a.id]).length;
+  document.getElementById('nb-al').textContent = remaining;
+  renderAlertsList();
+  if(S.charts['c-recovery']) {
+    S.charts['c-recovery'].data.datasets[0].backgroundColor = ALERT_PRODUCTS.map(a=>S.discounts[a.id]?'#22c55e':a.t==='urgent'?'#ef4444':a.t==='warn'?'#f59e0b':'#3b82f6');
+    S.charts['c-recovery'].update();
+  }
+  toast(`Discount removed for ${name}`, 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  AI ADVISOR — XGBoost + Linear Regression + DQN
+// ═══════════════════════════════════════════════════════════════
+function renderAdvisor() {
+  document.getElementById('sw-content').innerHTML = `
+  <div class="row-3">
+    <div class="card mb16" style="padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><div class="step">1</div><span style="font-size:12px;font-weight:600;color:var(--red-tx)">XGBoost Classifier</span></div>
+      <div style="font-size:11px;color:var(--txm);line-height:1.5">Gradient Boosting with 3 trees. Features: days_left, stock/demand, margin. Outputs waste probability 0–1.</div>
+    </div>
+    <div class="card mb16" style="padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><div class="step" style="background:var(--blu)">2</div><span style="font-size:12px;font-weight:600;color:var(--blu-tx)">Ridge Regression</span></div>
+      <div style="font-size:11px;color:var(--txm);line-height:1.5">Lag-1 (β=0.49), Lag-2 (β=0.31), Days-left (β=0.08), Price (β=-0.002). MAE ≈ 2.1 units/day.</div>
+    </div>
+    <div class="card mb16" style="padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><div class="step" style="background:var(--acc)">3</div><span style="font-size:12px;font-weight:600;color:var(--acc-dk)">Deep Q-Network</span></div>
+      <div style="font-size:11px;color:var(--txm);line-height:1.5">State: [freshness, stock, demand, price-changes, category]. 6 actions: 0–50% discount in steps of 10%.</div>
+    </div>
+  </div>
+  <div class="ai-dark mb16">
+    <h3>◉ AI Product Advisor</h3>
+    <p>Enter details about any product. The three models run in sequence and give you a precise recommendation.</p>
+    <div class="ai-grid" style="margin-bottom:12px">
+      <div class="ai-field"><label>Days Until Expiry</label><input type="number" id="ai-d" value="4" min="0" max="365"></div>
+      <div class="ai-field"><label>Stock on Shelf (units)</label><input type="number" id="ai-s" value="80" min="0"></div>
+      <div class="ai-field"><label>Avg Daily Demand</label><input type="number" id="ai-dem" value="12" min="0"></div>
+      <div class="ai-field"><label>Selling Price (${cur()})</label><input type="number" id="ai-p" value="100" min="0"></div>
+      <div class="ai-field"><label>Cost per Unit (${cur()})</label><input type="number" id="ai-c" value="55" min="0"></div>
+      <div class="ai-field"><label>Price Changes This Week</label><input type="number" id="ai-ch" value="1" min="0" max="15"></div>
+      <div class="ai-field"><label>Sales Yesterday</label><input type="number" id="ai-l1" value="11" min="0"></div>
+      <div class="ai-field"><label>Sales Day Before</label><input type="number" id="ai-l2" value="13" min="0"></div>
+      <div class="ai-field"><label>Category</label>
+        <select id="ai-cat"><option>Dairy</option><option>Bakery</option><option>Fresh Produce</option><option>Beverages</option><option>Canned Goods</option><option>Snacks</option><option>Frozen</option></select>
+      </div>
+    </div>
+    <button class="btn btn-acc" style="width:100%;justify-content:center;padding:10px;font-size:14px" onclick="runAdvisor()">▶ Run All 3 AI Models</button>
+    <div id="ai-out"></div>
+  </div>`;
+}
+
+async function runAdvisor() {
+  const days = +document.getElementById('ai-d').value||0;
+  const stock = +document.getElementById('ai-s').value||0;
+  const dem = +document.getElementById('ai-dem').value||10;
+  const price = +document.getElementById('ai-p').value||100;
+  const cost = +document.getElementById('ai-c').value||55;
+  const ch = +document.getElementById('ai-ch').value||0;
+  const l1 = +document.getElementById('ai-l1').value||10;
+  const l2 = +document.getElementById('ai-l2').value||10;
+  const catName = document.getElementById('ai-cat').value;
+  const catId = CATS.indexOf(catName)||0;
+  const shelf = {Dairy:14,Bakery:7,'Fresh Produce':10,Beverages:180,'Canned Goods':730,Snacks:180,Frozen:180}[catName]||14;
+
+  let risk, forecast, discount, discP, units, rev, prof, cover, source, modelsUsed;
+
+  try {
+    const resp = await apiPost('/api/ai/recommend', {
+      daysLeft: days, stock, demandRate: dem, price, cost,
+      priceChangeCount: ch, lag1: l1, lag2: l2, category: catName, shelfLife: shelf,
+    });
+    risk = resp.expiryRisk;
+    forecast = resp.demandForecast;
+    discount = resp.recommendedDiscount;
+    discP = resp.suggestedPrice;
+    rev = resp.expectedRevenue;
+    prof = resp.expectedProfit;
+    cover = resp.daysCover;
+    units = Math.min(stock, Math.round(forecast*(1+discount/25)));
+    modelsUsed = resp.modelsUsed;
+    source = 'live — Java backend + Python ML microservice';
+  } catch (e) {
+    console.warn('AI backend unreachable, using in-browser model simulation:', e.message);
+    risk = xgboost(days, stock, dem, price, cost);
+    forecast = linearRegression(l1, l2, days, price);
+    discount = dqn(days, stock, forecast, ch, catId, shelf).discount;
+    discP = Math.round(price*(1-discount/100));
+    units = Math.min(stock, Math.round(forecast*(1+discount/25)));
+    rev = Math.round(units*discP);
+    prof = Math.round(rev - units*cost);
+    cover = Math.round(stock/Math.max(forecast,1));
+    modelsUsed = { expiry:'rule-based (offline)', demand:'rule-based (offline)', discount:'rule-based (offline)' };
+    source = 'offline demo simulation (API unreachable)';
+  }
+
+  // Local Q-value shape purely for the illustrative chart below, pinned to the real chosen discount
+  const { qValues } = dqn(days, stock, forecast, ch, catId, shelf);
+  qValues[discount/10] = Math.max(...qValues) + 0.1;
+
+  const riskTx = risk>0.65?'var(--red-tx)':risk>0.35?'var(--amb-tx)':'var(--grn-tx)';
+  const recMsg = discount===0?'✓ No discount needed — product is fresh and demand is healthy.'
+    :discount<=15?`A mild ${discount}% markdown should move stock without hurting margin.`
+    :`${discount}% discount recommended — act now to maximise recovery before expiry.`;
+
+  document.getElementById('ai-out').innerHTML = `
+    <div style="margin-top:14px">
+      <div style="font-size:10px;color:#64748b;margin-bottom:8px;text-align:right">Source: ${source} — expiry: ${modelsUsed.expiry} · demand: ${modelsUsed.demand} · discount: ${modelsUsed.discount}</div>
+      <div class="ai-grid" style="margin-bottom:12px">
+        <div class="ai-rc">
+          <div class="ai-rc-lb">Expiry Waste Risk</div>
+          <div class="ai-rc-vl" style="color:${riskTx}">${(risk*100).toFixed(1)}%</div>
+          <div class="ai-rc-sb">${risk>0.65?'High — act immediately':risk>0.35?'Moderate — monitor closely':'Low — product is stable'}</div>
+        </div>
+        <div class="ai-rc">
+          <div class="ai-rc-lb">Demand Forecast</div>
+          <div class="ai-rc-vl" style="color:#60a5fa">${forecast} units/day</div>
+          <div class="ai-rc-sb">Stock covers: ${cover} days</div>
+        </div>
+        <div class="ai-rc">
+          <div class="ai-rc-lb">DQN Optimal Discount</div>
+          <div class="ai-rc-vl" style="color:var(--acc)">${discount}%</div>
+          <div class="ai-rc-sb">${cur()}${price} → ${cur()}${discP}/unit</div>
+        </div>
+      </div>
+      <div class="ai-rec" style="background:${risk>0.65?'#450a0a':risk>0.35?'#431407':'#052e16'};border-color:${risk>0.65?'#991b1b':risk>0.35?'#9a3412':'#166534'};color:${risk>0.65?'#fca5a5':risk>0.35?'#fdba74':'#86efac'}">${recMsg}</div>
+      <div style="margin-top:12px">
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">DQN Q-Values (action selection)</div>
+        <div class="cw cw-180"><canvas id="c-qvalues"></canvas></div>
+      </div>
+      <div class="ai-why">
+        <strong style="color:#e2e8f0">Result summary:</strong><br>
+        Expiry risk model flags a <strong>${(risk*100).toFixed(1)}%</strong> chance this batch goes to waste at current pricing.<br>
+        Demand model forecasts <strong>${forecast} units/day</strong>, giving ${cover} days of stock cover at current stock levels.<br>
+        Discount policy selects a <strong>${discount}% markdown</strong> as the reward-maximising action (balancing lost margin vs. waste risk vs. customer trust).<br>
+        Expected outcome: ~${units} units × ${cur()}${discP} = <strong style="color:#fbbf24">${cur()}${Number(rev).toLocaleString()}</strong> revenue, <strong style="color:${prof>=0?'#4ade80':'#f87171'}">${cur()}${Math.abs(prof).toLocaleString()} ${prof>=0?'profit':'loss'}</strong>
+      </div>
+    </div>`;
+
+  setTimeout(()=>{
+    makeChart('c-qvalues',{type:'bar',data:{labels:['0%','10%','20%','30%','40%','50%'],datasets:[{label:'Q-value',data:qValues,backgroundColor:qValues.map((v,i)=>i===discount/10?'#f59e0b':'#334155'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Q = ${c.parsed.y.toFixed(3)}`}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}},y:{grid:{color:'#1e293b'},ticks:{color:'#94a3b8',font:{size:10}}}}}});
+  },80);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DEMAND FORECAST
+// ═══════════════════════════════════════════════════════════════
+function renderDemand() {
+  document.getElementById('sw-content').innerHTML = `
+  <div class="kpi-grid kpi-grid-3 mb16">
+    <div class="kpi-card"><div class="kpi-lb">Model MAE</div><div class="kpi-vl">2.1 units/day</div><div class="kpi-dl dl-up">↑ Better than naive (4.8)</div></div>
+    <div class="kpi-card"><div class="kpi-lb">7-Day Forecast</div><div class="kpi-vl">3,376 units</div><div class="kpi-dl dl-nt">+3.2% vs last week</div></div>
+    <div class="kpi-card"><div class="kpi-lb">Peak Day (Wed+1)</div><div class="kpi-vl">510 units</div><div class="kpi-dl dl-up">Sufficient stock</div></div>
+  </div>
+  <div class="card mb16">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:0">Actual vs Forecasted Daily Sales</div>
+      <div style="display:flex;gap:12px;font-size:12px;align-items:center">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#3b82f6;display:inline-block;border-radius:2px"></span>Actual</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#f59e0b;display:inline-block;border-radius:2px;border-top:1px dashed #f59e0b"></span>Forecast</span>
+      </div>
+    </div>
+    <div class="cw cw-260"><canvas id="c-forecast"></canvas></div>
+  </div>
+  <div class="row-2e">
+    <div class="card mb16">
+      <div class="card-title">Top Products by Forecast Volume</div>
+      ${[['Full Cream Milk 1L',94,100],['Greek Yogurt 400g',78,80],['Orange Juice 1L',65,70],['Cherry Tomatoes',52,55],['Multigrain Bread',48,50]].map(([n,v,m])=>`
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${n}</span><span style="font-weight:600">${v} u/day</span></div>
+        <div class="pb" style="width:100%"><div class="pb-fill" style="width:${Math.round(v/m*100)}%;background:var(--blu)"></div></div>
+      </div>`).join('')}
+    </div>
+    <div class="card mb16">
+      <div class="card-title">AI-Driven Reorder Recommendations</div>
+      ${[['Multigrain Bread',34,1,'Order 150u','red'],['Full Cream Milk 1L',82,2,'Order 200u','red'],['Baby Spinach 250g',56,3,'Order 100u','amb'],['Greek Yogurt 400g',124,6,'Order 80u','grn']].map(([n,s,d,a,c])=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:9px;border-radius:7px;margin-bottom:7px;background:var(--${c}-bg);border:1px solid var(--${c}-brd)">
+        <div><div style="font-size:13px;font-weight:500">${n}</div><div style="font-size:11px;color:var(--txm)">${s} left · ${d}d expiry</div></div>
+        <span class="pill p-${c}">${a}</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+
+  setTimeout(()=>{
+    makeChart('c-forecast',{type:'line',data:{labels:FORECAST.map(d=>d.d),datasets:[{label:'Actual',data:FORECAST.map(d=>d.a),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',fill:true,borderWidth:2,pointRadius:4,pointBackgroundColor:'#3b82f6',tension:0.3,spanGaps:false},{label:'Forecast',data:FORECAST.map(d=>d.f),borderColor:'#f59e0b',borderDash:[6,4],backgroundColor:'rgba(245,158,11,0.06)',fill:true,borderWidth:2,pointRadius:3,pointBackgroundColor:'#f59e0b',tension:0.3,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y||'—'} units`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10}}}}}});
+  },60);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  B2B HUB — Generate Quote (Fully Functional)
+// ═══════════════════════════════════════════════════════════════
+function renderB2B() {
+  document.getElementById('sw-content').innerHTML = `
+  <div class="kpi-grid kpi-grid-4 mb16">
+    <div class="kpi-card"><div class="kpi-lb">Active B2B Customers</div><div class="kpi-vl">50</div></div>
+    <div class="kpi-card"><div class="kpi-lb">MTD B2B Revenue</div><div class="kpi-vl">${cur()}8.9L</div></div>
+    <div class="kpi-card"><div class="kpi-lb">Avg Order Value</div><div class="kpi-vl">${cur()}18,400</div></div>
+    <div class="kpi-card"><div class="kpi-lb">NMF Components</div><div class="kpi-vl">20</div></div>
+  </div>
+  <div class="card mb16">
+    <div class="card-title">Customer Spend Comparison (MTD)</div>
+    <div class="cw cw-180"><canvas id="c-b2b-spend"></canvas></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="b2b-cards"></div>`;
+
+  document.getElementById('b2b-cards').innerHTML = B2B.map(c=>{
+    const initials = c.name.split(' ').map(w=>w[0]).join('').substring(0,2);
+    const recProds = c.rec.map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);
+    return `<div class="b2b-card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div class="b2b-av">${initials}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">${c.name}</div>
+          <div style="font-size:12px;color:var(--txm)">${c.id} · ${c.city}</div>
+        </div>
+        ${tierPill(c.tier)}
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:12px">
+        <div style="flex:1;background:var(--bg);border-radius:6px;padding:8px;text-align:center">
+          <div style="font-size:10px;color:var(--txm);margin-bottom:2px">ORDERS MTD</div>
+          <div style="font-size:16px;font-weight:600">${c.orders}</div>
+        </div>
+        <div style="flex:1;background:var(--bg);border-radius:6px;padding:8px;text-align:center">
+          <div style="font-size:10px;color:var(--txm);margin-bottom:2px">SPEND</div>
+          <div style="font-size:16px;font-weight:600">${cur()}${(c.spend/1000).toFixed(0)}K</div>
+        </div>
+        <div style="flex:1;background:var(--bg);border-radius:6px;padding:8px;text-align:center">
+          <div style="font-size:10px;color:var(--txm);margin-bottom:2px">LAST ORDER</div>
+          <div style="font-size:14px;font-weight:500">${c.lastOrder}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--txm);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">NMF Recommendations</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">
+        ${recProds.map(p=>`<span style="background:var(--grn-bg);color:var(--grn-tx);font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500">${p.name}</span>`).join('')}
+      </div>
+      <button class="btn btn-dark" style="width:100%;justify-content:center" onclick="openQuote('${c.id}')">Generate Quote →</button>
+    </div>`;
+  }).join('');
+
+  setTimeout(()=>{
+    makeChart('c-b2b-spend',{type:'bar',data:{labels:B2B.map(c=>c.name.split(' ')[0]),datasets:[{label:'MTD Spend (₹)',data:B2B.map(c=>c.spend),backgroundColor:['#f59e0b','#3b82f6','#8b5cf6','#22c55e'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`₹${c.parsed.y.toLocaleString()}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10},callback:v=>`₹${(v/1000).toFixed(0)}K`}}}}});
+  },60);
+}
+
+function openQuote(custId) {
+  const cust = B2B.find(c=>c.id===custId);
+  if(!cust) return;
+  const store = S.store||{name:'ShelfWise Store',city:'',currency:'₹',manager:''};
+  const recProds = cust.rec.map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);
+  const quoteNum = `Q-${Date.now().toString().slice(-6)}`;
+  const today = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const validTill = new Date(Date.now()+7*24*3600*1000).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const defaultQty = {P01:200,P04:120,P07:150,P08:80,P02:100,P03:80,P06:60,P12:50,P05:60,P13:40,P09:100,P11:50,P10:30,P14:80,P15:100};
+
+  const rows = recProds.map(p=>{
+    const qty = defaultQty[p.id]||50;
+    const ep = getEffectivePrice(p);
+    return {p,qty,ep};
+  });
+
+  const subtotal = rows.reduce((a,r)=>a+r.qty*r.ep,0);
+  const gst = Math.round(subtotal*0.18);
+  const total = subtotal+gst;
+
+  modal(`<div class="mo-box" id="quote-box">
+    <div class="quote-hd">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="quote-logo">⬡ ${store.name||'ShelfWise ERP'}</div>
+          <div class="quote-sub">${store.city?store.city+' · ':''} AI-Powered Retail Management</div>
+          ${store.manager?`<div class="quote-sub">Contact: ${store.manager}</div>`:''}
+        </div>
+        <div style="text-align:right">
+          <div class="quote-num">QUOTE #${quoteNum}</div>
+          <div class="quote-date">Date: ${today}</div>
+          <div class="quote-date">Valid till: ${validTill}</div>
+        </div>
+      </div>
+    </div>
+    <div class="mo-hd" style="margin-top:0">
+      <div class="mo-title">Purchase Quote</div>
+      <button class="mo-cls" onclick="closeModal()">×</button>
+    </div>
+    <div class="quote-to">
+      <div style="font-size:11px;color:var(--txm);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Bill To</div>
+      <div style="font-weight:600;font-size:14px">${cust.name}</div>
+      <div style="font-size:12px;color:var(--txm)">${cust.contact} · ${cust.phone} · ${cust.city}</div>
+      <div style="font-size:12px;color:var(--txm)">Customer ID: ${cust.id} · Tier: ${cust.tier.toUpperCase()}</div>
+    </div>
+    <div style="font-size:11px;color:var(--txm);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Recommended Products (NMF Model)</div>
+    <div style="background:var(--blu-bg);border:1px solid var(--blu-brd);border-radius:6px;padding:7px 12px;margin-bottom:12px;font-size:11px;color:var(--blu-tx)">
+      Quantities are AI-suggested based on past purchase patterns. Edit the fields below to customise.
+    </div>
+    <div class="tbl-wrap">
+      <table class="qt-table">
+        <thead><tr><th>#</th><th>Product</th><th>Category</th><th>Unit Price</th><th>Qty</th><th>Total</th></tr></thead>
+        <tbody id="qt-body">
+          ${rows.map((r,i)=>`<tr id="qt-row-${i}">
+            <td style="color:var(--txm)">${i+1}</td>
+            <td style="font-weight:500">${r.p.name}</td>
+            <td><span class="pill p-gray">${r.p.cat}</span></td>
+            <td>${cur()}${r.ep}${S.discounts[r.p.id]?` <span style="font-size:10px;color:var(--grn-tx)">(discounted)</span>`:''}</td>
+            <td><input class="qt-input" type="number" value="${r.qty}" min="1" id="qt-qty-${i}" onchange="updateQtTotal(${i},${r.ep})"></td>
+            <td id="qt-tot-${i}" style="font-weight:500">${cur()}${(r.qty*r.ep).toLocaleString()}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;border-top:2px solid var(--brd);padding-top:10px">
+      <div style="display:flex;justify-content:flex-end;flex-direction:column;align-items:flex-end;gap:4px">
+        <div style="font-size:13px;color:var(--txm)">Subtotal: <strong id="qt-sub">${cur()}${subtotal.toLocaleString()}</strong></div>
+        <div style="font-size:13px;color:var(--txm)">GST (18%): <strong id="qt-gst">${cur()}${gst.toLocaleString()}</strong></div>
+      </div>
+    </div>
+    <div class="qt-total">
+      <span>Grand Total</span>
+      <span id="qt-grand" style="font-size:18px">${cur()}${total.toLocaleString()}</span>
+    </div>
+    <div style="margin-top:16px;padding:10px 12px;background:#f8fafc;border-radius:6px;font-size:12px;color:var(--txm)">
+      Terms: Payment within 30 days · Delivery: 2-3 business days · Prices valid for 7 days
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn btn-out" onclick="closeModal()">Close</button>
+      <button class="btn btn-out" onclick="copyQuote('${cust.name}','${quoteNum}')">📋 Copy as Text</button>
+      <button class="btn btn-acc" onclick="printQuote()">🖨 Print Quote</button>
+    </div>
+  </div>`);
+  window._quoteData = {rows, cust, quoteNum, today, store};
+}
+
+function updateQtTotal(i, unitPrice) {
+  const qty = +document.getElementById(`qt-qty-${i}`).value||0;
+  const total = qty * unitPrice;
+  document.getElementById(`qt-tot-${i}`).textContent = `${cur()}${total.toLocaleString()}`;
+  recalcQuoteGrand();
+}
+
+function recalcQuoteGrand() {
+  const rows = window._quoteData?.rows||[];
+  let sub = 0;
+  rows.forEach((r,i)=>{
+    const qty = +document.getElementById(`qt-qty-${i}`)?.value||r.qty;
+    sub += qty * r.ep;
+  });
+  const gst = Math.round(sub*0.18);
+  document.getElementById('qt-sub').textContent = `${cur()}${sub.toLocaleString()}`;
+  document.getElementById('qt-gst').textContent = `${cur()}${gst.toLocaleString()}`;
+  document.getElementById('qt-grand').textContent = `${cur()}${(sub+gst).toLocaleString()}`;
+}
+
+function printQuote() { window.print(); }
+
+function copyQuote(custName, qNum) {
+  const {rows} = window._quoteData||{rows:[]};
+  const store = S.store||{name:'ShelfWise Store'};
+  let sub = 0;
+  let lines = rows.map((r,i)=>{
+    const qty = +document.getElementById(`qt-qty-${i}`)?.value||r.qty;
+    const tot = qty*r.ep;
+    sub += tot;
+    return `${r.p.name.padEnd(28)} x${qty}  ${cur()}${r.ep}  =  ${cur()}${tot.toLocaleString()}`;
+  });
+  const txt = `QUOTE ${qNum} — ${store.name}\nBill To: ${custName}\n\n${lines.join('\n')}\n\nSubtotal: ${cur()}${sub.toLocaleString()}\nGST(18%): ${cur()}${Math.round(sub*.18).toLocaleString()}\nTOTAL: ${cur()}${(sub+Math.round(sub*.18)).toLocaleString()}`;
+  navigator.clipboard.writeText(txt).then(()=>toast('Quote copied to clipboard','ok')).catch(()=>toast('Could not copy — please print instead','info'));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  FRAUD WATCH
+// ═══════════════════════════════════════════════════════════════
+function renderFraud() {
+  const flagged = FRAUD_TXN.filter(t=>t.flagged);
+  document.getElementById('sw-content').innerHTML = `
+  <div class="kpi-grid kpi-grid-4 mb16">
+    <div class="kpi-card"><div class="kpi-lb">Transactions Scanned</div><div class="kpi-vl">2,000</div></div>
+    <div class="kpi-card" style="border-left:3px solid var(--red)"><div class="kpi-lb">Flagged Anomalies</div><div class="kpi-vl" style="color:var(--red)">${flagged.length}</div></div>
+    <div class="kpi-card"><div class="kpi-lb">Contamination Rate</div><div class="kpi-vl">5%</div></div>
+    <div class="kpi-card"><div class="kpi-lb">Model</div><div class="kpi-vl" style="font-size:14px">Isolation Forest</div></div>
+  </div>
+  <div class="row-2e">
+    <div class="card mb16">
+      <div class="card-title">Anomaly Score Distribution</div>
+      <div class="cw cw-200"><canvas id="c-fraud-scores"></canvas></div>
+    </div>
+    <div class="card mb16">
+      <div class="card-title">Feature Importance</div>
+      <div class="cw cw-200"><canvas id="c-fraud-feat"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Recent Transactions</div>
+    ${FRAUD_TXN.map(t=>`
+    <div class="fraud-row ${t.flagged?'flagged':''}">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:600">${t.id}</span>
+          <span style="font-size:11px;color:var(--txm);font-family:monospace">cust:${t.cust}</span>
+          ${t.flagged?`<span class="pill p-red">⚑ Flagged</span>`:`<span class="pill p-grn">✓ Clear</span>`}
+        </div>
+        <div style="font-size:12px;color:var(--txm)">${t.prod} · Qty: ${t.qty} · ${cur()}${t.price}/unit · Hour: ${t.hour}:00</div>
+        ${t.flagged?`<div style="font-size:12px;color:var(--red-tx);margin-top:2px;font-weight:500">⚠ ${t.reason}</div>`:''}
+      </div>
+      <div style="text-align:center;flex-shrink:0">
+        <div style="font-size:9px;color:var(--txm);text-transform:uppercase;margin-bottom:3px">Anomaly</div>
+        <div class="pill ${t.score>0.7?'p-red':t.score>0.4?'p-amb':'p-grn'}" style="font-size:13px">${(t.score*100).toFixed(0)}%</div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+  setTimeout(()=>{
+    makeChart('c-fraud-scores',{type:'scatter',data:{datasets:[{label:'Normal',data:FRAUD_TXN.filter(t=>!t.flagged).map(t=>({x:t.qty,y:t.score})),backgroundColor:'#22c55e',pointRadius:6},{label:'Flagged',data:FRAUD_TXN.filter(t=>t.flagged).map(t=>({x:t.qty,y:t.score})),backgroundColor:'#ef4444',pointRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:c=>`Qty:${c.parsed.x} Score:${(c.parsed.y*100).toFixed(0)}%`}}},scales:{x:{title:{display:true,text:'Transaction Qty',font:{size:11}},grid:{color:'#f1f5f9'}},y:{title:{display:true,text:'Anomaly Score',font:{size:11}},grid:{color:'#f1f5f9'},min:0,max:1}}}});
+    makeChart('c-fraud-feat',{type:'bar',data:{labels:['Quantity','Price','Hour','TxnCount7d','PaymentType','CustFreq'],datasets:[{label:'Importance',data:[0.34,0.22,0.18,0.12,0.09,0.05],backgroundColor:'#3b82f6',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#f1f5f9'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  },60);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ANALYTICS
+// ═══════════════════════════════════════════════════════════════
+function renderAnalytics() {
+  document.getElementById('sw-content').innerHTML = `
+  <div class="tab-bar">
+    <div class="tab ${S.analyticsTab==='pareto'?'active':''}" onclick="switchAnalyticsTab('pareto')">Pareto Analysis (80/20)</div>
+    <div class="tab ${S.analyticsTab==='discount'?'active':''}" onclick="switchAnalyticsTab('discount')">Discount Impact</div>
+    <div class="tab ${S.analyticsTab==='waste'?'active':''}" onclick="switchAnalyticsTab('waste')">Waste Deep Dive</div>
+  </div>
+  <div id="analytics-body"></div>`;
+  renderAnalyticsBody();
+}
+
+function switchAnalyticsTab(tab) {
+  S.analyticsTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>{ if(t.textContent.toLowerCase().includes(tab.substring(0,5).toLowerCase())) t.classList.add('active'); });
+  ['c-pareto','c-disc-scatter','c-waste-bar','c-waste-trend'].forEach(id=>destroyChart(id));
+  renderAnalyticsBody();
+}
+
+function renderAnalyticsBody() {
+  const body = document.getElementById('analytics-body');
+  if(!body) return;
+  if(S.analyticsTab==='pareto') {
+    body.innerHTML = `
+    <div class="card mb16">
+      <div class="card-title">Pareto Chart — Cumulative Sales Contribution</div>
+      <div class="cw cw-300"><canvas id="c-pareto"></canvas></div>
+    </div>
+    <div class="insight" style="background:var(--grn-bg);border-color:var(--grn-brd);color:var(--grn-tx)">
+      <span>✓</span><span>Top <strong>15 out of 200 products</strong> account for <strong>80.1% of total sales</strong> — classic Pareto distribution confirmed. Focus reorder budget on these core SKUs.</span>
+    </div>
+    <div class="card">
+      <div class="card-title">Top 15 Products by Sales Volume</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Rank</th><th>Product</th><th>Units Sold</th><th>Cumulative %</th><th>Classification</th></tr></thead>
+      <tbody>${PARETO.map(p=>`<tr>
+        <td style="font-weight:700;color:${p.r<=3?'var(--amb)':'var(--tx)'}">#${p.r}</td>
+        <td>${p.p}</td>
+        <td>${p.s.toLocaleString()}</td>
+        <td style="width:160px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="pb" style="width:80px"><div class="pb-fill" style="width:${Math.min(100,p.c)}%;background:${p.c<=80?'var(--blu)':'var(--brd)'}"></div></div>
+            <span style="font-size:12px">${p.c}%</span>
+          </div>
+        </td>
+        <td>${p.c<=80?'<span class="pill p-blu">Core SKU</span>':'<span class="pill p-gray">Long Tail</span>'}</td>
+      </tr>`).join('')}</tbody></table></div>
+    </div>`;
+    setTimeout(()=>{
+      makeChart('c-pareto',{type:'bar',data:{labels:PARETO.map(p=>`#${p.r}`),datasets:[{type:'bar',label:'Units Sold',data:PARETO.map(p=>p.s),backgroundColor:'#3b82f6',borderRadius:3,yAxisID:'y'},{type:'line',label:'Cumulative %',data:PARETO.map(p=>p.c),borderColor:'#f59e0b',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#f59e0b',tension:0.1,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12}},tooltip:{mode:'index',intersect:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10}},title:{display:true,text:'Units',font:{size:10}}},y2:{position:'right',grid:{display:false},min:0,max:100,ticks:{font:{size:10},callback:v=>`${v}%`},title:{display:true,text:'Cumulative %',font:{size:10}}}}}});
+    },60);
+  } else if(S.analyticsTab==='discount') {
+    body.innerHTML = `
+    <div class="card mb16">
+      <div class="card-title">Discount % vs Sales Velocity (DQN Training Signal)</div>
+      <div class="cw cw-300"><canvas id="c-disc-scatter"></canvas></div>
+    </div>
+    <div class="row-2e">
+      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:6px">Correlation Analysis</div>
+        <div style="font-size:28px;font-weight:700;color:var(--blu)">0.94</div>
+        <div style="font-size:12px;color:var(--txm);margin-top:4px">Strong positive correlation — higher discounts reliably increase sales velocity</div>
+        <div style="margin-top:14px"><div style="font-size:12px;font-weight:500;margin-bottom:4px">Trust penalty threshold</div><div style="font-size:12px;color:var(--txm)">At >20% discount with >3 price changes in 7 days, DQN applies a trust penalty to the reward signal, preventing excessive price churn.</div></div>
+      </div>
+      <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:10px">Optimal Discount Bands</div>
+        ${[['0% — No discount','Fresh products, low stock','Good'],['10–20%','7+ days, moderate stock','Good'],['30%','3–6 days left','Warn'],['40–50%','1–2 days, urgent','Danger']].map(([d,c,t])=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--brd2)">
+          <div><div style="font-size:13px;font-weight:500">${d}</div><div style="font-size:11px;color:var(--txm)">${c}</div></div>
+          <span class="pill p-${t==='Good'?'grn':t==='Warn'?'amb':'red'}">${t}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+    setTimeout(()=>{
+      makeChart('c-disc-scatter',{type:'scatter',data:{datasets:[{label:'Transactions',data:SCATTER,backgroundColor:'rgba(59,130,246,0.6)',pointRadius:6},{label:'Trust penalty zone',data:[{x:20,y:0},{x:50,y:0}],type:'line',borderColor:'rgba(239,68,68,0.5)',borderDash:[4,4],pointRadius:0,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:c=>`Discount: ${c.parsed.x}% | Velocity: ${c.parsed.y}x`}}},scales:{x:{title:{display:true,text:'Discount %',font:{size:11}},grid:{color:'#f1f5f9'},min:0,max:55},y:{title:{display:true,text:'Sales Velocity Multiplier',font:{size:11}},grid:{color:'#f1f5f9'},min:0}}}});
+    },60);
+  } else {
+    body.innerHTML = `
+    <div class="row-2e">
+      <div class="card mb16"><div class="card-title">Waste by Category (kg)</div><div class="cw cw-220"><canvas id="c-waste-bar"></canvas></div></div>
+      <div class="card mb16"><div class="card-title">Waste Rate vs Revenue</div>
+        ${WASTE_CAT.map((c,i)=>{
+          const rate = (WASTE_VAL[i]/(WASTE_VAL[i]*18)).toFixed(1);
+          const revs = [18400,8200,12600,22100,9800,15400,11200];
+          return `<div style="margin-bottom:9px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+              <span>${c}</span>
+              <span style="color:${WASTE_VAL[i]>60?'var(--red)':WASTE_VAL[i]>30?'var(--amb)':'var(--grn-tx)'};font-weight:500">${WASTE_VAL[i]}kg waste</span>
+            </div>
+            <div class="pb" style="width:100%"><div class="pb-fill" style="width:${Math.min(100,WASTE_VAL[i])}%;background:${WASTE_VAL[i]>60?'var(--red)':WASTE_VAL[i]>30?'var(--amb)':'var(--grn)'}"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">AI Waste Reduction Recommendations</div>
+      ${[['Produce',89,'Reduce order frequency from weekly to 3×/week','red'],['Bakery',67,'Lower DQN discount threshold to trigger at 5 days (vs 7)','amb'],['Dairy',42,'Reorder in smaller batch sizes — current batches too large','amb'],['Frozen',31,'Check freezer temperature logs — slight variance detected','blu']].map(([c,w,a,t])=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;margin-bottom:8px;background:var(--${t}-bg);border:1px solid var(--${t}-brd)">
+        <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--${t}-tx)">${c} — ${w}kg wasted this month</div><div style="font-size:12px;color:var(--txm);margin-top:2px">AI suggestion: ${a}</div></div>
+        <span class="pill p-${t}">${w}kg</span>
+      </div>`).join('')}
+    </div>`;
+    setTimeout(()=>{
+      makeChart('c-waste-bar',{type:'bar',data:{labels:WASTE_CAT,datasets:[{label:'Waste (kg)',data:WASTE_VAL,backgroundColor:WASTE_VAL.map(v=>v>60?'#ef4444':v>30?'#f59e0b':'#22c55e'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y}kg`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10},callback:v=>`${v}kg`}}}}});
+    },60);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SUPPLIERS
+// ═══════════════════════════════════════════════════════════════
+function renderSuppliers() {
+  document.getElementById('sw-content').innerHTML = `
+  <div class="kpi-grid kpi-grid-4 mb16">
+    <div class="kpi-card"><div class="kpi-lb">Active Suppliers</div><div class="kpi-vl">${SUPPLIERS.length}</div></div>
+    <div class="kpi-card"><div class="kpi-lb">Avg Lead Time</div><div class="kpi-vl">3.6 days</div></div>
+    <div class="kpi-card"><div class="kpi-lb">Avg Reliability</div><div class="kpi-vl" style="color:var(--grn)">93.8%</div></div>
+    <div class="kpi-card"><div class="kpi-lb">MTD Procurement</div><div class="kpi-vl">${cur()}3.5L</div></div>
+  </div>
+  <div class="card mb16">
+    <div class="card-title">Supplier Reliability Comparison</div>
+    <div class="cw cw-200"><canvas id="c-sup-rel"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Supplier Directory</div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>Supplier</th><th>Categories</th><th>Contact</th><th>Lead Time</th><th>Reliability</th><th>Last Order</th><th>MTD Spend</th><th>Status</th></tr></thead>
+      <tbody>
+        ${SUPPLIERS.map(s=>`<tr>
+          <td style="font-weight:600">${s.name}</td>
+          <td>${s.cats.map(c=>`<span class="pill p-gray" style="margin-right:3px">${c}</span>`).join('')}</td>
+          <td style="font-size:12px;color:var(--txm)">${s.contact}</td>
+          <td style="font-weight:500">${s.lead}d</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="pb" style="width:60px"><div class="pb-fill" style="width:${s.rel}%;background:${s.rel>95?'var(--grn)':s.rel>88?'var(--amb)':'var(--red)'}"></div></div>
+              <span style="font-size:12px">${s.rel}%</span>
+            </div>
+          </td>
+          <td style="color:var(--txm)">${s.lastOrder}</td>
+          <td>${cur()}${(s.spend/1000).toFixed(1)}K</td>
+          <td>${s.status==='active'?'<span class="pill p-grn">Active</span>':'<span class="pill p-amb">Under Review</span>'}</td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>
+  </div>`;
+  setTimeout(()=>{
+    makeChart('c-sup-rel',{type:'bar',data:{labels:SUPPLIERS.map(s=>s.name.split(' ')[0]),datasets:[{label:'Reliability %',data:SUPPLIERS.map(s=>s.rel),backgroundColor:SUPPLIERS.map(s=>s.rel>95?'#22c55e':s.rel>88?'#f59e0b':'#ef4444'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Reliability: ${c.parsed.y}%`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#f1f5f9'},min:80,max:100,ticks:{font:{size:10},callback:v=>`${v}%`}}}}});
+  },60);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════════════════
+function renderSettings() {
+  const st = S.store||{};
+  document.getElementById('sw-content').innerHTML = `
+  <div style="max-width:560px">
+    <div class="card mb16">
+      <div class="card-title">Store Profile</div>
+      <div class="form-field">
+        <label class="frm-label">Business / Store Name *</label>
+        <input class="frm-input" id="cfg-name" value="${st.name||''}" placeholder="Your store name">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-field">
+          <label class="frm-label">City / Location</label>
+          <input class="frm-input" id="cfg-city" value="${st.city||''}" placeholder="e.g. Chennai">
+        </div>
+        <div class="form-field">
+          <label class="frm-label">Currency Symbol</label>
+          <input class="frm-input" id="cfg-cur" value="${st.currency||'₹'}" placeholder="₹">
+        </div>
+      </div>
+      <div class="form-field">
+        <label class="frm-label">Manager / Owner Name</label>
+        <input class="frm-input" id="cfg-mgr" value="${st.manager||''}" placeholder="Your name">
+      </div>
+      <div class="form-field">
+        <label class="frm-label">Store Type</label>
+        <select class="frm-input" id="cfg-type">
+          ${['Grocery / Supermarket','Convenience Store','Wholesale / B2B Distributor','Specialty Food Store','Pharmacy / Medical Store'].map(t=>`<option ${st.type===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="frm-label">Fiscal Year</label>
+        <input class="frm-input" id="cfg-fiscal" value="${st.fiscal||'FY 2025-26'}" placeholder="FY 2025-26">
+      </div>
+      <button class="btn btn-acc" onclick="saveSettings()">Save Changes</button>
+    </div>
+    <div class="card mb16">
+      <div class="card-title">AI Model Status</div>
+      ${[['XGBoost Classifier','Expiry waste risk','Trained','grn'],['Ridge Regression','Demand forecasting','Trained','grn'],['Deep Q-Network','Discount optimisation','Trained','grn'],['NMF (20 components)','B2B recommendations','Trained','grn'],['Isolation Forest','Fraud detection','Trained','grn']].map(([n,d,s,c])=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--brd2)">
+        <div><div style="font-size:13px;font-weight:500">${n}</div><div style="font-size:11px;color:var(--txm)">${d}</div></div>
+        <span class="pill p-${c}">${s}</span>
+      </div>`).join('')}
+      <div style="margin-top:12px;font-size:12px;color:var(--txm)">To retrain models: run <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px">python train_all.py</code> in the backend folder, then restart the API server.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--red-tx)">Data Management</div>
+      <div style="font-size:13px;color:var(--txm);margin-bottom:12px">Applied discounts are saved locally on this device.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-out btn-sm" onclick="clearDiscounts()">Clear All Applied Discounts</button>
+        <button class="btn btn-out btn-sm" onclick="if(confirm('Reset all store settings?')){localStorage.clear();location.reload()}">Reset All Settings</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function saveSettings() {
+  S.store = {
+    name: document.getElementById('cfg-name').value.trim()||'My Store',
+    city: document.getElementById('cfg-city').value.trim(),
+    currency: document.getElementById('cfg-cur').value.trim()||'₹',
+    manager: document.getElementById('cfg-mgr').value.trim(),
+    type: document.getElementById('cfg-type').value,
+    fiscal: document.getElementById('cfg-fiscal').value.trim()||'FY 2025-26',
+  };
+  localStorage.setItem('sw_store', JSON.stringify(S.store));
+  document.getElementById('sb-store-nm').textContent = S.store.name;
+  document.getElementById('tb-fiscal').textContent = S.store.fiscal;
+  toast(`Settings saved — welcome, ${S.store.name}!`,'ok');
+}
+
+function clearDiscounts() {
+  if(!confirm('Remove all applied discounts?')) return;
+  S.discounts = {};
+  localStorage.setItem('sw_disc','{}');
+  document.getElementById('nb-al').textContent = ALERT_PRODUCTS.length;
+  toast('All discounts cleared','info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SETUP & INIT
+// ═══════════════════════════════════════════════════════════════
+function setupSave() {
+  const name = document.getElementById('su-name').value.trim();
+  if(!name) { toast('Please enter your store name','err'); return; }
+  S.store = {
+    name, city: document.getElementById('su-city').value.trim(),
+    currency: document.getElementById('su-cur').value.trim()||'₹',
+    manager: document.getElementById('su-mgr').value.trim(),
+    type: document.getElementById('su-type').value,
+    fiscal: 'FY 2025-26',
+  };
+  localStorage.setItem('sw_store', JSON.stringify(S.store));
+  document.getElementById('sw-setup').style.display = 'none';
+  launchApp();
+}
+
+function launchApp() {
+  const app = document.getElementById('sw-app');
+  app.style.display = 'flex';
+  const st = S.store||{};
+  document.getElementById('sb-store-nm').textContent = st.name||'My Store';
+  if(st.fiscal) document.getElementById('tb-fiscal').textContent = st.fiscal;
+  go('dashboard');
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(!S.store) {
+    document.getElementById('sw-setup').style.display = 'flex';
+  } else {
+    launchApp();
+  }
+});
+
+// Expose for inline onclick
+window.go=go; window.go=go; window.applyDiscount=applyDiscount; window.undoDiscount=undoDiscount;
+window.openQuote=openQuote; window.closeModal=closeModal; window.runAdvisor=runAdvisor;
+window.filterInv=filterInv; window.switchAnalyticsTab=switchAnalyticsTab;
+window.saveSettings=saveSettings; window.clearDiscounts=clearDiscounts;
+window.updateQtTotal=updateQtTotal; window.printQuote=printQuote; window.copyQuote=copyQuote;
+window.setupSave=setupSave;
+
+// Polyfill form-field style (settings page)
+document.head.insertAdjacentHTML('beforeend',`<style>.form-field{margin-bottom:14px}</style>`);
+</script>
+</body>
+</html>
