@@ -1,0 +1,22 @@
+# ShelfWise ERP — Python dependencies
+# Install: pip install -r requirements.txt
+
+# Core
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+pydantic==2.7.1
+
+# Data
+pandas==2.2.2
+numpy==1.26.4
+
+# ML
+scikit-learn==1.4.2
+xgboost==2.0.3
+joblib==1.4.2
+torch==2.3.0
+
+# Viz (optional, for generate_diagrams.py)
+matplotlib==3.8.4
+plotly==5.21.0
