@@ -1,0 +1,31 @@
+### Java / Maven ###
+backend-java/target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/
+hs_err_pid*
+
+### Python ###
+ml-service/__pycache__/
+ml-service/**/__pycache__/
+ml-service/.venv/
+ml-service/venv/
+ml-service/*.pkl
+ml-service/*.pth
+ml-service/models/*.pkl
+ml-service/data/
+*.pyc
+
+### IDE ###
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+### Env / secrets ###
+.env
+.env.local
+
+### Logs ###
+*.log
