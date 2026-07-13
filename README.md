@@ -1,4 +1,4 @@
-# ShelfWise ERP
+# ShelfWise AI Retail ERP
 
 **AI-powered retail ERP for expiry management, demand forecasting, dynamic discounting, fraud detection, and B2B recommendations.**
 
@@ -10,6 +10,10 @@ A polyglot, microservice-style system: a **Java Spring Boot** backend owns all b
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
+**🔗 Live demo (frontend only):** [rishanthdeveloper.github.io/shelfwise-ai-retail-erp](https://rishanthdeveloper.github.io/shelfwise-ai-retail-erp/)
+
+> GitHub Pages only serves static files, so it can't run the Java backend or Python ML service — the hosted demo above shows the full UI/UX with demo data (or its own in-browser fallback simulation of the models), not a live database or real model inference. Run `docker compose up --build` locally (see [Quick start](#quick-start)) to get the real Spring Boot API, Postgres data, and actual DQN/XGBoost/Ridge/Isolation-Forest/NMF predictions behind every screen.
 
 ---
 
@@ -178,6 +182,56 @@ Just open `frontend/index.html` in a browser. It talks to `http://localhost:8080
 |---|---|---|
 | `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` / `DB_PASSWORD` | `localhost` / `5432` / `shelfwise` / `shelfwise` / `shelfwise` | Postgres connection |
 | `ML_SERVICE_URL` | `http://localhost:8000` | Base URL of the Python ML microservice |
+
+---
+
+## Deploying the backend + ML service (to make the live demo show real data)
+
+The GitHub Pages link only hosts `frontend/index.html`. To make that page pull real data, you need `backend-java` and `ml-service` running somewhere reachable over HTTPS, then point the frontend at it.
+
+### 1. Deploy `ml-service` (Python/FastAPI)
+
+Any container host works (Render, Railway, Fly.io). Using **Render** as an example:
+
+1. Push this repo to GitHub (if not already).
+2. Render dashboard → **New → Web Service** → connect the repo.
+3. Root directory: `ml-service`
+4. Render auto-detects the `Dockerfile` — or set manually:
+   - Build command: `pip install -r requirements.txt && python train_all.py`
+   - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+5. Deploy. Note the resulting URL, e.g. `https://shelfwise-ml.onrender.com`.
+
+### 2. Deploy `backend-java` (Spring Boot)
+
+1. Render dashboard → **New → Web Service** → same repo, root directory `backend-java` (Dockerfile auto-detected).
+2. **New → PostgreSQL** → create a free Postgres instance; copy its connection details.
+3. Set environment variables on the `backend-java` service:
+
+   | Variable | Value |
+   |---|---|
+   | `DB_HOST` | from the Render Postgres instance |
+   | `DB_PORT` | `5432` |
+   | `DB_NAME` | your Postgres database name |
+   | `DB_USER` | your Postgres user |
+   | `DB_PASSWORD` | your Postgres password |
+   | `ML_SERVICE_URL` | the `ml-service` URL from step 1, e.g. `https://shelfwise-ml.onrender.com` |
+
+4. Deploy. Note the resulting URL, e.g. `https://shelfwise-backend.onrender.com`.
+5. Sanity check: `curl https://shelfwise-backend.onrender.com/api/health` should return `{"status":"ok","mlService":"up"}`.
+
+> **CORS is already open** in `WebConfig.java` (`allowedOriginPatterns("*")` on `/api/**`), so no extra config is needed for the GitHub Pages origin to call it.
+
+### 3. Point the GitHub Pages frontend at the live backend
+
+Add one line before the closing `</body>` (or right after `<script>` opens) in `frontend/index.html`, then commit and push — GitHub Pages redeploys automatically:
+
+```html
+<script>window.SHELFWISE_API_BASE = 'https://shelfwise-backend.onrender.com';</script>
+```
+
+Once deployed, reload the [live demo](https://rishanthdeveloper.github.io/shelfwise-ai-retail-erp/) — the Dashboard, Expiry Alerts, and AI Advisor will now show real Postgres data and real model predictions instead of the offline fallback.
+
+> **Free-tier note:** Render's free web services spin down after inactivity and take ~30–60s to wake up on the first request — the frontend's fallback logic means visitors just see demo data briefly instead of an error while it wakes up.
 
 ---
 
