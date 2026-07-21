@@ -1,0 +1,58 @@
+ShelfWise-ERP/
+├── backend/
+│   ├── src/main/java/com/shelfwise/
+│   │   ├── ShelfWiseApplication.java
+│   │   ├── config/
+│   │   │   ├── OpenApiConfig.java
+│   │   │   └── WebClientConfig.java
+│   │   ├── controller/
+│   │   │   ├── AIController.java
+│   │   │   ├── AlertController.java
+│   │   │   ├── AnalyticsController.java
+│   │   │   ├── DashboardController.java
+│   │   │   ├── FraudController.java
+│   │   │   └── ProductController.java
+│   │   ├── dto/
+│   │   │   ├── AIRecommendRequestDTO.java
+│   │   │   ├── AIRecommendResponseDTO.java
+│   │   │   ├── AnalyticsDTO.java
+│   │   │   ├── DashboardSummaryDTO.java
+│   │   │   ├── FraudDetectRequestDTO.java
+│   │   │   └── FraudDetectResponseDTO.java
+│   │   ├── exception/
+│   │   │   └── GlobalExceptionHandler.java
+│   │   ├── model/
+│   │   │   ├── Alert.java
+│   │   │   ├── B2BOrder.java
+│   │   │   ├── Product.java
+│   │   │   └── Transaction.java
+│   │   ├── repository/
+│   │   │   ├── AlertRepository.java
+│   │   │   ├── B2BOrderRepository.java
+│   │   │   ├── ProductRepository.java
+│   │   │   └── TransactionRepository.java
+│   │   └── service/
+│   │       ├── AIService.java
+│   │       ├── AlertService.java
+│   │       ├── AnalyticsService.java
+│   │       ├── DashboardService.java
+│   │       ├── FraudService.java
+│   │       └── ProductService.java
+│   ├── src/main/resources/
+│   │   ├── application.yml
+│   │   └── data.sql
+│   ├── Dockerfile
+│   └── pom.xml
+│
+├── ml-service/
+│   ├── main.py                  ← FastAPI inference server
+│   ├── shelfwise_dqn_model.py   ← DQN network + agent
+│   ├── train_all.py             ← offline training pipeline
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── frontend/
+│   └── index.html               ← Single-page app (calls Java API)
+│
+├── docker-compose.yml
+└── README.md
