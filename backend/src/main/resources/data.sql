@@ -40,3 +40,14 @@ SELECT * FROM (VALUES
 ) AS v(order_reference,retailer_name,retailer_size,product_id,product_name,
        quantity_ordered,unit_price,discount_applied,total_value,payment_terms,status,created_at)
 WHERE NOT EXISTS (SELECT 1 FROM b2b_orders WHERE order_reference = v.order_reference);
+
+-- Seed default demo users
+INSERT INTO users (username, email, password, full_name, role, avatar_url, created_at)
+SELECT * FROM (VALUES
+  ('admin','admin@shelfwise.ai','admin123','System Administrator','ADMIN','https://api.dicebear.com/7.x/avataaars/svg?seed=admin',NOW()),
+  ('manager','manager@shelfwise.ai','manager123','Sarah Jenkins','STORE_MANAGER','https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',NOW()),
+  ('analyst','analyst@shelfwise.ai','analyst123','Alex Rivera','AI_ANALYST','https://api.dicebear.com/7.x/avataaars/svg?seed=alex',NOW()),
+  ('clerk','clerk@shelfwise.ai','clerk123','Marcus Chen','INVENTORY_CLERK','https://api.dicebear.com/7.x/avataaars/svg?seed=marcus',NOW())
+) AS v(username,email,password,full_name,role,avatar_url,created_at)
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = v.username);
+

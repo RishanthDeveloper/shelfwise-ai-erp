@@ -127,11 +127,22 @@
       #main{margin-left:200px;padding:20px}
       .grid-2,.grid-3{grid-template-columns:1fr}
       .advisor-grid{grid-template-columns:1fr}
-    }
-    @media(max-width:640px){
-      #sidebar{transform:translateX(-100%)}
-      #main{margin-left:0}
-    }
+    /* ── Auth Modal Overlay ── */
+    #auth-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(10,14,26,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:999;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:all 0.3s ease}
+    #auth-overlay.active{opacity:1;pointer-events:all}
+    .auth-card{background:var(--bg-800);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:440px;box-shadow:0 20px 50px rgba(0,0,0,0.6);position:relative;overflow:hidden;transform:translateY(20px);transition:transform 0.3s ease}
+    #auth-overlay.active .auth-card{transform:translateY(0)}
+    .auth-card::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:radial-gradient(circle,var(--accent-glow),transparent);border-radius:50%}
+    .auth-tabs{display:flex;gap:12px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:12px}
+    .auth-tab{font-size:0.95rem;font-weight:600;color:var(--text-300);cursor:pointer;padding-bottom:6px;border-bottom:2px solid transparent;transition:var(--transition)}
+    .auth-tab.active{color:var(--accent-light);border-bottom-color:var(--accent)}
+    .quick-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+    .quick-chip{font-size:0.75rem;padding:6px 12px;border-radius:20px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-300);cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:4px}
+    .quick-chip:hover{background:rgba(99,102,241,0.2);color:#fff;border-color:var(--accent)}
+    .user-badge{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;transition:var(--transition)}
+    .user-badge:hover{background:rgba(255,255,255,0.06);border-color:rgba(99,102,241,0.3)}
+    .user-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.85rem;overflow:hidden;flex-shrink:0}
+    .user-avatar img{width:100%;height:100%;object-fit:cover}
   </style>
 </head>
 <body>
@@ -169,6 +180,14 @@
     </div>
   </nav>
   <div class="sidebar-footer">
+    <div class="user-badge" id="sidebar-user" onclick="openAuthModal()" title="Click to Switch User / Login">
+      <div class="user-avatar" id="user-avatar-box">👤</div>
+      <div style="flex:1;overflow:hidden">
+        <div id="user-name-display" style="font-weight:600;font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Sign In / Register</div>
+        <div id="user-role-display" style="font-size:0.68rem;color:var(--text-300)">Click to authenticate</div>
+      </div>
+      <button class="btn btn-ghost" id="logout-btn" style="padding:4px 8px;font-size:0.75rem;display:none" title="Sign Out" onclick="event.stopPropagation(); logoutUser()">🚪</button>
+    </div>
     <div><span class="status-dot"></span><span id="api-status">API connecting…</span></div>
     <div style="margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-500)">v1.0.0 · Java+Python</div>
   </div>
@@ -361,6 +380,67 @@
   </section>
 
 </main>
+
+<!-- ═══════════════════════════ AUTH MODAL OVERLAY ═══════════════════════════ -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent-light),#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent">ShelfWise ERP</h2>
+      <p style="font-size:0.82rem;color:var(--text-300);margin-top:4px">AI Smart Shelf Management Authentication</p>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</div>
+      <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Create Account</div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-500);margin-bottom:8px">⚡ Quick Demo Login</div>
+      <div class="quick-chips">
+        <div class="quick-chip" onclick="quickLogin('manager@shelfwise.ai', 'manager123')">⚡ Manager</div>
+        <div class="quick-chip" onclick="quickLogin('analyst@shelfwise.ai', 'analyst123')">🤖 AI Specialist</div>
+        <div class="quick-chip" onclick="quickLogin('admin@shelfwise.ai', 'admin123')">🛡️ Admin</div>
+      </div>
+    </div>
+
+    <div id="auth-error" style="display:none;padding:10px 14px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-sm);color:var(--red);font-size:0.82rem;margin-bottom:16px"></div>
+
+    <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+      <div class="form-group" id="group-fullname" style="display:none">
+        <label>Full Name</label>
+        <input type="text" id="auth-fullname" placeholder="e.g. Sarah Jenkins"/>
+      </div>
+      <div class="form-group">
+        <label id="label-identifier">Email or Username</label>
+        <input type="text" id="auth-identifier" placeholder="e.g. manager@shelfwise.ai" required/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div style="position:relative">
+          <input type="password" id="auth-password" placeholder="••••••••" required/>
+          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;opacity:0.6;font-size:0.9rem" onclick="togglePasswordVisibility()">👁️</span>
+        </div>
+      </div>
+      <div class="form-group" id="group-role" style="display:none">
+        <label>Role</label>
+        <select id="auth-role">
+          <option value="STORE_MANAGER">Store Manager</option>
+          <option value="AI_ANALYST">AI Specialist</option>
+          <option value="ADMIN">System Admin</option>
+          <option value="INVENTORY_CLERK">Inventory Clerk</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;margin-top:8px" id="auth-btn-submit">
+        🔓 Sign In
+      </button>
+    </form>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn btn-ghost" style="font-size:0.78rem" onclick="closeAuthModal()">Continue as Guest / Demo Mode</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ════════════════════════════════════════════════════════════════
@@ -769,16 +849,130 @@ async function loadB2B() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// UTILITIES
+// AUTHENTICATION & USER MANAGEMENT
 // ════════════════════════════════════════════════════════════════
-function fmtNum(n) {
-  if (n === null || n === undefined) return '0';
-  if (n >= 1_000_000) return (n/1_000_000).toFixed(1) + 'M';
-  if (n >= 1_000)     return (n/1_000).toFixed(1) + 'k';
-  return n.toFixed(0);
+let authMode = 'login';
+let currentUser = JSON.parse(localStorage.getItem('shelfwise_user') || 'null');
+
+function openAuthModal() {
+  document.getElementById('auth-overlay').classList.add('active');
+  hideAuthError();
+}
+function closeAuthModal() {
+  document.getElementById('auth-overlay').classList.remove('active');
+}
+function switchAuthTab(mode) {
+  authMode = mode;
+  hideAuthError();
+  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+  document.getElementById('tab-register').classList.toggle('active', mode === 'register');
+  document.getElementById('group-fullname').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('group-role').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('label-identifier').textContent = mode === 'register' ? 'Email Address' : 'Email or Username';
+  document.getElementById('auth-btn-submit').textContent = mode === 'register' ? '✨ Create Account' : '🔓 Sign In';
+}
+function togglePasswordVisibility() {
+  const pwd = document.getElementById('auth-password');
+  pwd.type = pwd.type === 'password' ? 'text' : 'password';
+}
+function showAuthError(msg) {
+  const box = document.getElementById('auth-error');
+  box.textContent = '⚠️ ' + msg;
+  box.style.display = 'block';
+}
+function hideAuthError() {
+  document.getElementById('auth-error').style.display = 'none';
+}
+function quickLogin(email, password) {
+  document.getElementById('auth-identifier').value = email;
+  document.getElementById('auth-password').value = password;
+  switchAuthTab('login');
+  document.getElementById('auth-form').dispatchEvent(new Event('submit'));
+}
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  hideAuthError();
+  const btn = document.getElementById('auth-btn-submit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Authenticating…';
+
+  const identifier = document.getElementById('auth-identifier').value.trim();
+  const password = document.getElementById('auth-password').value;
+
+  try {
+    let response;
+    if (authMode === 'login') {
+      response = await apiPost('/auth/login', { identifier, password });
+    } else {
+      const fullName = document.getElementById('auth-fullname').value.trim();
+      const role = document.getElementById('auth-role').value;
+      response = await apiPost('/auth/register', { username: identifier.split('@')[0], email: identifier, password, fullName, role });
+    }
+
+    if (response && response.success) {
+      currentUser = response;
+      localStorage.setItem('shelfwise_user', JSON.stringify(currentUser));
+      updateSidebarUser();
+      closeAuthModal();
+    } else {
+      showAuthError((response && response.message) || 'Authentication failed');
+    }
+  } catch(err) {
+    console.warn('Backend auth offline, using local session mode:', err);
+    // Offline / Demo fallback user creation
+    const roleMap = { 'admin@shelfwise.ai':'ADMIN', 'analyst@shelfwise.ai':'AI_ANALYST' };
+    const role = roleMap[identifier] || 'STORE_MANAGER';
+    const nameMap = { 'admin@shelfwise.ai':'System Administrator', 'analyst@shelfwise.ai':'Alex Rivera', 'manager@shelfwise.ai':'Sarah Jenkins' };
+    currentUser = {
+      userId: 99,
+      username: identifier.split('@')[0],
+      email: identifier,
+      fullName: nameMap[identifier] || (identifier.split('@')[0].toUpperCase()),
+      role: role,
+      avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${identifier}`
+    };
+    localStorage.setItem('shelfwise_user', JSON.stringify(currentUser));
+    updateSidebarUser();
+    closeAuthModal();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = authMode === 'register' ? '✨ Create Account' : '🔓 Sign In';
+  }
+}
+
+function logoutUser() {
+  currentUser = null;
+  localStorage.removeItem('shelfwise_user');
+  updateSidebarUser();
+  openAuthModal();
+}
+
+function updateSidebarUser() {
+  const avatarBox = document.getElementById('user-avatar-box');
+  const nameDisplay = document.getElementById('user-name-display');
+  const roleDisplay = document.getElementById('user-role-display');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  if (currentUser) {
+    nameDisplay.textContent = currentUser.fullName || currentUser.username;
+    roleDisplay.textContent = (currentUser.role || 'USER').replace('_', ' ');
+    logoutBtn.style.display = 'inline-flex';
+    if (currentUser.avatarUrl) {
+      avatarBox.innerHTML = `<img src="${currentUser.avatarUrl}" alt="Avatar"/>`;
+    } else {
+      avatarBox.textContent = (currentUser.fullName || currentUser.username).charAt(0).toUpperCase();
+    }
+  } else {
+    nameDisplay.textContent = 'Sign In / Register';
+    roleDisplay.textContent = 'Click to authenticate';
+    avatarBox.innerHTML = '👤';
+    logoutBtn.style.display = 'none';
+  }
 }
 
 // ── Boot ─────────────────────────────────────────────────────────
+updateSidebarUser();
 loadDashboard();
 </script>
 </body>
